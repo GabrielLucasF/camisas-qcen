@@ -1,4 +1,4 @@
-export type ShirtSize = 'PP' | 'P' | 'M' | 'G' | 'GG' | 'XG' | 'XXG' | 'Infantil' | 'A definir';
+export type ShirtSize = 'P' | 'M' | 'G' | 'GG' | 'G1' | 'A definir';
 
 export type PaymentStatus = 'paid' | 'half' | 'pending';
 
@@ -11,6 +11,8 @@ export interface OrderItem {
 export interface Order {
   id: string;
   personName: string;
+  whatsapp?: string;
+  paymentMethod?: string;
   items: OrderItem[];
   status: PaymentStatus;
   unitPrice?: number;

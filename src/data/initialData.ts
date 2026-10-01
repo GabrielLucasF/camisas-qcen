@@ -1,14 +1,11 @@
 import { Order, AppSettings, ShirtSize } from '../types/order';
 
 export const AVAILABLE_SIZES: ShirtSize[] = [
-  'PP',
   'P',
   'M',
   'G',
   'GG',
-  'XG',
-  'XXG',
-  'Infantil',
+  'G1',
   'A definir'
 ];
 

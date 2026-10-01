@@ -23,6 +23,9 @@ function criarFormularioQCEN() {
       '🔥 BEM-VINDO(A) AO PEDIDO OFICIAL DAS CAMISAS DO QCEN (Que Comece Em Nós)!\n\n' +
       'Preencha seus dados para garantir sua peça do movimento.\n\n' +
       '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n' +
+      '⏰ PRAZO MÁXIMO PARA PEDIDOS: ATÉ 10/10/2026!\n' +
+      'Pedidos e envio de comprovantes encerram impreterivelmente no dia 10/10/2026 para envio à confecção.\n\n' +
+      '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n' +
       '💰 VALORES E FORMAS DE PAGAMENTO:\n' +
       '• Valor total da camisa: R$ 70,00\n' +
       '• Metade (sinal mínimo para confecção): R$ 35,00\n' +
@@ -30,8 +33,7 @@ function criarFormularioQCEN() {
       '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n' +
       '📲 OBRIGATÓRIO: ENVIO DO COMPROVANTE PIX\n' +
       'Assim que realizar o pagamento, envie o comprovante diretamente no WhatsApp para:\n' +
-      '👉 Amanda Pardim: (33) 99866-9831\n' +
-      '*(O pedido entra como pendente até o envio do comprovante)*\n\n' +
+      '👉 Amanda Pardim: (33) 99866-9831\n\n' +
       '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n' +
       '📏 TABELA OFICIAL DE MEDIDAS (Largura x Comprimento x Manga):\n' +
       '• P:  52 cm larg | 71 cm comp | 24 cm manga\n' +
@@ -39,7 +41,7 @@ function criarFormularioQCEN() {
       '• G:  58 cm larg | 75 cm comp | 26 cm manga\n' +
       '• GG: 61 cm larg | 77 cm comp | 27 cm manga\n' +
       '• G1: 64 cm larg | 80 cm comp | 28 cm manga\n' +
-      '• A definir: (para quem deseja tirar dúvida com a liderança)\n' +
+      '• A definir: (para quem deseja pedir dicas à liderança)\n' +
       '*(OBS: As medidas podem variar 2cm para mais ou para menos)*\n' +
       '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
     );
@@ -66,10 +68,7 @@ function criarFormularioQCEN() {
       'G (58 cm larg x 75 cm comp)',
       'GG (61 cm larg x 77 cm comp)',
       'G1 (64 cm larg x 80 cm comp)',
-      'PP',
-      'XXG',
-      'Infantil',
-      'A definir (Vou confirmar a medida depois com a liderança)'
+      'A definir (Vou pedir dica para a liderança)'
     ])
     .setRequired(true);
 
@@ -90,21 +89,10 @@ function criarFormularioQCEN() {
   itemMulti.setTitle('5. Se pediu mais de 1 camisa, quais são os tamanhos?')
     .setHelpText('Exemplo: 1 G e 1 M (Pode deixar em branco caso tenha pedido apenas 1 peça).');
 
-  // 6. Pagamento
-  const itemPagamento = form.addMultipleChoiceItem();
-  itemPagamento.setTitle('6. Como será realizado o pagamento?')
-    .setHelpText('Lembre-se de mandar o comprovante para Amanda no WhatsApp!')
-    .setChoiceValues([
-      'Vou pagar o valor total agora (R$ 70,00)',
-      'Vou pagar metade agora (R$ 35,00) e a outra metade na entrega',
-      'Pagarei em outro momento antes do fechamento do lote'
-    ])
-    .setRequired(true);
-
-  // 7. Observações
+  // 6. Observações
   const itemObs = form.addParagraphTextItem();
-  itemObs.setTitle('7. Observações / Recado (Opcional)')
-    .setHelpText('Exemplo: Alguma instrução especial para entrega ou observação.');
+  itemObs.setTitle('6. Observações / Recado (Opcional)')
+    .setHelpText('Exemplo: Alguma instrução especial ou observação.');
 
   // Mensagem pós-envio
   form.setConfirmationMessage(

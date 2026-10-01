@@ -31,7 +31,8 @@ export function ShareModal({
     const lines: string[] = [];
 
     lines.push(`🔥 *QCEN — QUE COMECE EM NÓS* 🔥`);
-    lines.push(`👕 *${settings.title.toUpperCase()}*\n`);
+    lines.push(`👕 *${settings.title.toUpperCase()}*`);
+    lines.push(`⏰ *PRAZO FINAL DOS PEDIDOS: ATÉ 10/10/2026!*\n`);
 
     lines.push(`📊 *RESUMO DE TAMANHOS:*`);
     sizeSummary
@@ -133,6 +134,27 @@ export function ShareModal({
 
         {/* Content */}
         <div className="p-5 overflow-y-auto space-y-4">
+          {/* Public Form Link */}
+          <div className="p-3 rounded-xl bg-blue-500/10 border border-blue-500/25 flex items-center justify-between gap-2 text-xs">
+            <div className="truncate">
+              <span className="text-[10px] uppercase font-bold text-blue-400 block">Link do Formulário Público:</span>
+              <span className="text-white font-mono truncate text-[11px]">
+                {typeof window !== 'undefined' ? `${window.location.origin}` : 'https://camisas-qcen.vercel.app'}
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                const url = typeof window !== 'undefined' ? `${window.location.origin}` : 'https://camisas-qcen.vercel.app';
+                navigator.clipboard.writeText(url);
+                alert('Link do formulário copiado!');
+              }}
+              className="px-2.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shrink-0 transition"
+            >
+              Copiar Link
+            </button>
+          </div>
+
           {/* Options */}
           <div className="flex flex-col sm:flex-row gap-2.5 sm:gap-4 p-3 rounded-xl bg-[#15192c] border border-[#222846] text-xs text-neutral-300">
             <label className="flex items-center gap-2 cursor-pointer select-none">

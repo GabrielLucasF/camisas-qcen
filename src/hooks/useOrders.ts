@@ -3,6 +3,8 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { Order, AppSettings, SizeSummaryItem, PaymentStatus, OrderItem } from '../types/order';
 import { INITIAL_ORDERS, DEFAULT_SETTINGS, AVAILABLE_SIZES } from '../data/initialData';
+import { getSupabaseClient, isSupabaseConfigured } from '../lib/supabase';
+import { mapRowToOrder, mapOrderToRow } from '../lib/ordersService';
 
 const STORAGE_KEY_ORDERS = 'camisas_qcen_orders_v1';
 const STORAGE_KEY_SETTINGS = 'camisas_qcen_settings_v1';
@@ -18,30 +20,110 @@ export function useOrders() {
   const [settings, setSettings] = useState<AppSettings>(DEFAULT_SETTINGS);
   const [isLoaded, setIsLoaded] = useState(false);
 
-  // Load from localStorage on mount
+  // Load orders (Supabase if configured, otherwise localStorage)
   useEffect(() => {
-    try {
-      const storedOrders = localStorage.getItem(STORAGE_KEY_ORDERS);
-      const storedSettings = localStorage.getItem(STORAGE_KEY_SETTINGS);
+    let isMounted = true;
 
-      const parsedOrders: Order[] = storedOrders ? JSON.parse(storedOrders) : INITIAL_ORDERS;
-      const parsedSettings: AppSettings = storedSettings ? JSON.parse(storedSettings) : DEFAULT_SETTINGS;
+    async function loadData() {
+      const client = getSupabaseClient();
+      if (client) {
+        try {
+          const { data, error } = await client
+            .from('orders')
+            .select('*')
+            .order('created_at', { ascending: false });
 
-      let activeSettings = parsedSettings;
-      if (!parsedSettings.unitPrice || parsedSettings.unitPrice === 35) {
-        activeSettings = { ...parsedSettings, unitPrice: 70.0 };
+          if (!error && data && isMounted) {
+            const mappedOrders = data.map(mapRowToOrder);
+            setOrders(mappedOrders);
+            setIsLoaded(true);
+            return;
+          }
+        } catch {
+          // fall through to local storage if network error
+        }
       }
 
-      setOrders(parsedOrders);
-      setSettings(activeSettings);
-    } catch {
-      setOrders(INITIAL_ORDERS);
-      setSettings(DEFAULT_SETTINGS);
+      // Local storage fallback
+      try {
+        const storedOrders = localStorage.getItem(STORAGE_KEY_ORDERS);
+        const storedSettings = localStorage.getItem(STORAGE_KEY_SETTINGS);
+
+        const parsedOrders: Order[] = storedOrders ? JSON.parse(storedOrders) : INITIAL_ORDERS;
+        const parsedSettings: AppSettings = storedSettings ? JSON.parse(storedSettings) : DEFAULT_SETTINGS;
+
+        let activeSettings = parsedSettings;
+        if (!parsedSettings.unitPrice || parsedSettings.unitPrice === 35) {
+          activeSettings = { ...parsedSettings, unitPrice: 70.0 };
+        }
+
+        if (isMounted) {
+          setOrders(parsedOrders);
+          setSettings(activeSettings);
+        }
+      } catch {
+        if (isMounted) {
+          setOrders(INITIAL_ORDERS);
+          setSettings(DEFAULT_SETTINGS);
+        }
+      }
+
+      if (isMounted) {
+        setIsLoaded(true);
+      }
     }
-    setIsLoaded(true);
+
+    loadData();
+
+    // Supabase Realtime subscription
+    const client = getSupabaseClient();
+    if (!client) {
+      return () => {
+        isMounted = false;
+      };
+    }
+
+    const channel = client
+      .channel('realtime:orders')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'orders' },
+        (payload) => {
+          if (payload.eventType === 'INSERT') {
+            const newOrder = mapRowToOrder(payload.new);
+            setOrders((prev) => {
+              const alreadyExists = prev.some((o) => o.id === newOrder.id);
+              if (alreadyExists) {
+                return prev;
+              }
+              return [newOrder, ...prev];
+            });
+            return;
+          }
+
+          if (payload.eventType === 'UPDATE') {
+            const updated = mapRowToOrder(payload.new);
+            setOrders((prev) => prev.map((o) => (o.id === updated.id ? updated : o)));
+            return;
+          }
+
+          if (payload.eventType === 'DELETE') {
+            const deletedId = (payload.old as any)?.id;
+            if (deletedId) {
+              setOrders((prev) => prev.filter((o) => o.id !== deletedId));
+            }
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      isMounted = false;
+      client.removeChannel(channel);
+    };
   }, []);
 
-  // Save orders to localStorage
+  // Sync to localStorage as backup/cache
   useEffect(() => {
     if (!isLoaded) {
       return;
@@ -65,66 +147,118 @@ export function useOrders() {
     }
   }, [settings, isLoaded]);
 
-  const addOrder = useCallback((data: {
-    personName: string;
-    items: Array<{ size: OrderItem['size']; quantity: number }>;
-    status: PaymentStatus;
-    notes?: string;
-  }) => {
-    const now = new Date().toISOString();
-    const newOrder: Order = {
-      id: `order-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
-      personName: data.personName.trim(),
-      items: data.items.map((item, idx) => ({
-        id: `item-${Date.now()}-${idx}`,
-        size: item.size,
-        quantity: Math.max(1, item.quantity),
-      })),
-      status: data.status,
-      notes: data.notes?.trim() || undefined,
-      createdAt: now,
-      updatedAt: now,
-    };
+  const addOrder = useCallback(
+    async (data: {
+      personName: string;
+      whatsapp?: string;
+      items: Array<{ size: OrderItem['size']; quantity: number }>;
+      status: PaymentStatus;
+      notes?: string;
+    }) => {
+      const now = new Date().toISOString();
+      const newOrder: Order = {
+        id: `order-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+        personName: data.personName.trim(),
+        whatsapp: data.whatsapp?.trim() || undefined,
+        items: data.items.map((item, idx) => ({
+          id: `item-${Date.now()}-${idx}`,
+          size: item.size,
+          quantity: Math.max(1, item.quantity),
+        })),
+        status: data.status,
+        notes: data.notes?.trim() || undefined,
+        createdAt: now,
+        updatedAt: now,
+      };
 
-    setOrders((prev) => [newOrder, ...prev]);
-  }, []);
+      setOrders((prev) => [newOrder, ...prev]);
 
-  const updateOrder = useCallback((id: string, updates: Partial<Order>) => {
-    setOrders((prev) =>
-      prev.map((order) => {
-        if (order.id !== id) {
-          return order;
+      const client = getSupabaseClient();
+      if (client) {
+        await client.from('orders').insert(mapOrderToRow(newOrder));
+      }
+    },
+    []
+  );
+
+  const updateOrder = useCallback(
+    async (id: string, updates: Partial<Order>) => {
+      const now = new Date().toISOString();
+      setOrders((prev) =>
+        prev.map((order) => {
+          if (order.id !== id) {
+            return order;
+          }
+          return {
+            ...order,
+            ...updates,
+            updatedAt: now,
+          };
+        })
+      );
+
+      const client = getSupabaseClient();
+      if (client) {
+        const patch: any = { updated_at: now };
+        if (updates.personName !== undefined) {
+          patch.person_name = updates.personName;
         }
-        return {
-          ...order,
-          ...updates,
-          updatedAt: new Date().toISOString(),
-        };
-      })
-    );
-  }, []);
+        if (updates.whatsapp !== undefined) {
+          patch.whatsapp = updates.whatsapp;
+        }
+        if (updates.status !== undefined) {
+          patch.status = updates.status;
+        }
+        if (updates.items !== undefined) {
+          patch.items = updates.items;
+        }
+        if (updates.notes !== undefined) {
+          patch.notes = updates.notes;
+        }
+        await client.from('orders').update(patch).eq('id', id);
+      }
+    },
+    []
+  );
 
-  const deleteOrder = useCallback((id: string) => {
+  const deleteOrder = useCallback(async (id: string) => {
     setOrders((prev) => prev.filter((order) => order.id !== id));
+
+    const client = getSupabaseClient();
+    if (client) {
+      await client.from('orders').delete().eq('id', id);
+    }
   }, []);
 
   const togglePaymentStatus = useCallback((id: string) => {
-    setOrders((prev) =>
-      prev.map((order) => {
+    setOrders((prev) => {
+      const target = prev.find((o) => o.id === id);
+      if (!target) {
+        return prev;
+      }
+      const nextStatus = NEXT_PAYMENT_STATUS[target.status];
+      const now = new Date().toISOString();
+
+      const client = getSupabaseClient();
+      if (client) {
+        client.from('orders').update({ status: nextStatus, updated_at: now }).eq('id', id);
+      }
+
+      return prev.map((order) => {
         if (order.id !== id) {
           return order;
         }
-        const nextStatus = NEXT_PAYMENT_STATUS[order.status];
         return {
           ...order,
           status: nextStatus,
-          updatedAt: new Date().toISOString(),
+          updatedAt: now,
         };
-      })
-    );
+      });
+    });
   }, []);
 
   const setPaymentStatus = useCallback((id: string, status: PaymentStatus) => {
+    const now = new Date().toISOString();
     setOrders((prev) =>
       prev.map((order) => {
         if (order.id !== id) {
@@ -133,10 +267,15 @@ export function useOrders() {
         return {
           ...order,
           status,
-          updatedAt: new Date().toISOString(),
+          updatedAt: now,
         };
       })
     );
+
+    const client = getSupabaseClient();
+    if (client) {
+      client.from('orders').update({ status, updated_at: now }).eq('id', id);
+    }
   }, []);
 
   const updateSettings = useCallback((newSettings: Partial<AppSettings>) => {
@@ -151,8 +290,12 @@ export function useOrders() {
     setSettings(DEFAULT_SETTINGS);
   }, []);
 
-  const clearAll = useCallback(() => {
+  const clearAll = useCallback(async () => {
     setOrders([]);
+    const client = getSupabaseClient();
+    if (client) {
+      await client.from('orders').delete().neq('id', '');
+    }
   }, []);
 
   const importOrders = useCallback((newOrders: Order[]) => {

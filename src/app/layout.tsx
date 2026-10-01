@@ -5,8 +5,12 @@ export const metadata: Metadata = {
   title: "QCEN | Camisas — Que Comece Em Nós",
   description: "Gerenciador de pedidos de camisas, tamanhos e pagamentos do QCEN (Que Comece Em Nós).",
   icons: {
-    icon: "/qcen-logo.png",
-    apple: "/qcen-logo.png",
+    icon: [
+      { url: '/icon.png', sizes: '128x128', type: 'image/png' },
+      { url: '/qcen-logo.png' }
+    ],
+    shortcut: '/icon.png',
+    apple: '/qcen-logo.png',
   },
   appleWebApp: {
     capable: true,

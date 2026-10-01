@@ -4,7 +4,7 @@
 
 ![QCEN Logo](public/qcen-logo.png)
 
-### **🔥 QUE COMECE EM NÓS — GOVERNADOR VALADARES 🔥**
+### **🔥 QUE COMECE EM NÓS 🔥**
 
 *Aplicação moderna e ultra-rápida desenvolvida para gerenciamento de pedidos de camisas, contagem de tamanhos e controle financeiro do movimento **QCEN**.*
 
