@@ -102,12 +102,12 @@ export function SizeSummary({
         })}
       </div>
 
-      <div className="relative z-10 flex items-center justify-between mt-3 text-[11px] text-neutral-400">
-        <p>💡 Toque em um tamanho para filtrar quem pediu.</p>
-        <div className="flex items-center gap-1 text-orange-400/80 font-medium">
+      <div className="relative z-10 mt-3 pt-2.5 border-t border-[#1a1f36] flex items-center justify-between text-[11px] text-neutral-400">
+        <p>💡 Toque no tamanho para filtrar</p>
+        <span className="text-orange-400/90 font-bold flex items-center gap-1 shrink-0">
           <Flame className="w-3 h-3 text-orange-400" />
-          <span>QCEN Streetwear</span>
-        </div>
+          QCEN
+        </span>
       </div>
     </div>
   );

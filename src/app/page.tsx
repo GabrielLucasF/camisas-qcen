@@ -205,18 +205,6 @@ export default function Home() {
         </footer>
       </main>
 
-      {/* Floating Action Button for Mobile */}
-      <div className="fixed bottom-5 right-5 sm:hidden z-30">
-        <button
-          type="button"
-          onClick={handleOpenNewOrder}
-          className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white shadow-xl shadow-blue-600/40 flex items-center justify-center transition active:scale-90 border border-blue-400/40"
-          title="Adicionar Novo Pedido"
-        >
-          <Plus className="w-7 h-7 stroke-[3]" />
-        </button>
-      </div>
-
       {/* Modals */}
       <OrderFormModal
         isOpen={isOrderModalOpen}
