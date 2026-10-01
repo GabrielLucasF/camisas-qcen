@@ -162,12 +162,12 @@ export function SettingsModal({
                   type="text"
                   value={unitPrice}
                   onChange={(e) => setUnitPrice(e.target.value)}
-                  placeholder="35,00"
+                  placeholder="70,00"
                   className="w-full bg-[#15192c] border border-[#222846] rounded-xl pl-10 pr-3.5 py-2 text-sm text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono"
                 />
               </div>
               <p className="text-[11px] text-neutral-500 mt-1">
-                Usado para calcular automaticamente os totais arrecadados e pendentes.
+                Padrão: R$ 70,00 por camisa (Metade: R$ 35,00). Usado nos totais arrecadados e pendentes.
               </p>
             </div>
 

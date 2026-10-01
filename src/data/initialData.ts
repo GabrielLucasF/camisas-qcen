@@ -14,7 +14,7 @@ export const AVAILABLE_SIZES: ShirtSize[] = [
 
 export const DEFAULT_SETTINGS: AppSettings = {
   title: 'Camisas do QCEN',
-  unitPrice: 35.0,
+  unitPrice: 70.0,
 };
 
 export const INITIAL_ORDERS: Order[] = [

@@ -27,8 +27,13 @@ export function useOrders() {
       const parsedOrders: Order[] = storedOrders ? JSON.parse(storedOrders) : INITIAL_ORDERS;
       const parsedSettings: AppSettings = storedSettings ? JSON.parse(storedSettings) : DEFAULT_SETTINGS;
 
+      let activeSettings = parsedSettings;
+      if (!parsedSettings.unitPrice || parsedSettings.unitPrice === 35) {
+        activeSettings = { ...parsedSettings, unitPrice: 70.0 };
+      }
+
       setOrders(parsedOrders);
-      setSettings(parsedSettings);
+      setSettings(activeSettings);
     } catch {
       setOrders(INITIAL_ORDERS);
       setSettings(DEFAULT_SETTINGS);

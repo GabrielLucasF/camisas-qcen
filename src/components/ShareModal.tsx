@@ -45,7 +45,11 @@ export function ShareModal({
     const halfOrders = orders.filter((o) => o.status === 'half');
     const pendingOrders = orders.filter((o) => o.status === 'pending');
 
+    const unitPrice = settings.unitPrice || 70;
+    const halfPrice = unitPrice / 2;
+
     lines.push(`💰 *STATUS DOS PAGAMENTOS:*`);
+    lines.push(`💵 Valor: R$ ${unitPrice.toFixed(2).replace('.', ',')} (Metade: R$ ${halfPrice.toFixed(2).replace('.', ',')})`);
     lines.push(`✅ Pago Completo: ${paidOrders.length} pessoas`);
     lines.push(`⏳ Pago Metade: ${halfOrders.length} pessoas`);
     lines.push(`❌ Pendente: ${pendingOrders.length} pessoas\n`);
@@ -54,11 +58,13 @@ export function ShareModal({
       lines.push(`⚠️ *A PAGAR / METADE:*`);
       halfOrders.forEach((o) => {
         const sizesStr = o.items.map((i) => `${i.size}${i.quantity > 1 ? `x${i.quantity}` : ''}`).join(', ');
-        lines.push(`• ⏳ ${o.personName} (${sizesStr}) - Metade paga`);
+        lines.push(`• ⏳ ${o.personName} (${sizesStr}) - Metade paga (resta R$ ${halfPrice.toFixed(2).replace('.', ',')})`);
       });
       pendingOrders.forEach((o) => {
+        const totalItems = o.items.reduce((s, i) => s + (i.quantity || 1), 0);
+        const dueAmount = totalItems * unitPrice;
         const sizesStr = o.items.map((i) => `${i.size}${i.quantity > 1 ? `x${i.quantity}` : ''}`).join(', ');
-        lines.push(`• ❌ ${o.personName} (${sizesStr}) - Pendente`);
+        lines.push(`• ❌ ${o.personName} (${sizesStr}) - Pendente (R$ ${dueAmount.toFixed(2).replace('.', ',')})`);
       });
       lines.push('');
     }

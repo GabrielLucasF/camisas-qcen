@@ -45,7 +45,7 @@ export function FinancialSummary({
             Controle Financeiro
           </h2>
           <span className="text-xs text-neutral-400 font-mono">
-            ({formatCurrency(unitPrice)}/peça)
+            ({formatCurrency(unitPrice)}/peça • Metade: {formatCurrency(unitPrice / 2)})
           </span>
         </div>
 
