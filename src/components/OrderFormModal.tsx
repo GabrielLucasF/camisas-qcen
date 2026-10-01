@@ -188,7 +188,7 @@ export function OrderFormModal({
                 className="text-xs text-blue-400 hover:text-blue-300 font-bold flex items-center gap-1 px-2.5 py-1 rounded-lg bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 transition shrink-0 active:scale-95"
               >
                 <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
-                <span>+ Peça</span>
+                <span>Peça</span>
               </button>
             </div>
 
