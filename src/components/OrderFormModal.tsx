@@ -178,17 +178,17 @@ export function OrderFormModal({
 
           {/* Camisas e Tamanhos */}
           <div>
-            <div className="flex items-center justify-between mb-2">
-              <label className="text-xs font-bold uppercase tracking-wider text-neutral-300">
-                Camisas & Tamanhos ({items.reduce((s, i) => s + i.quantity, 0)})
+            <div className="flex items-center justify-between mb-2 gap-2">
+              <label className="text-xs font-bold uppercase tracking-wider text-neutral-300 truncate">
+                Camisas ({items.reduce((s, i) => s + i.quantity, 0)})
               </label>
               <button
                 type="button"
                 onClick={handleAddItem}
-                className="text-xs text-blue-400 hover:text-blue-300 font-bold flex items-center gap-1"
+                className="text-xs text-blue-400 hover:text-blue-300 font-bold flex items-center gap-1 px-2.5 py-1 rounded-lg bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 transition shrink-0 active:scale-95"
               >
-                <Plus className="w-3.5 h-3.5" />
-                Adicionar mais uma peça
+                <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
+                <span>+ Peça</span>
               </button>
             </div>
 
@@ -260,6 +260,15 @@ export function OrderFormModal({
                   </div>
                 </div>
               ))}
+
+              <button
+                type="button"
+                onClick={handleAddItem}
+                className="w-full py-2 rounded-xl border border-dashed border-[#262f50] hover:border-blue-500/50 bg-[#121626]/50 hover:bg-[#161c32] text-blue-400 text-xs font-bold flex items-center justify-center gap-1.5 transition active:scale-[0.99]"
+              >
+                <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
+                <span>Adicionar mais uma peça neste pedido</span>
+              </button>
             </div>
           </div>
 
