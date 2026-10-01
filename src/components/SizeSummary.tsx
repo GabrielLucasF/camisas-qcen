@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { SizeSummaryItem } from '../types/order';
-import { Shirt, Filter, X, Flame } from 'lucide-react';
+import { Shirt, Flame } from 'lucide-react';
 
 interface SizeSummaryProps {
   summary: SizeSummaryItem[];
@@ -31,22 +31,11 @@ export function SizeSummary({
           <h2 className="font-display text-base sm:text-lg tracking-wider text-white uppercase">
             Resumo de Tamanhos
           </h2>
-          <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-blue-500/15 text-blue-400 border border-blue-500/30">
-            {totalShirts} {totalShirts === 1 ? 'camisa' : 'camisas'}
-          </span>
         </div>
 
-        {selectedSize && (
-          <button
-            type="button"
-            onClick={() => onSelectSize(null)}
-            className="flex items-center gap-1.5 text-xs text-neutral-300 hover:text-white transition px-2.5 py-1 rounded-lg bg-[#1a2038] border border-blue-500/40"
-          >
-            <Filter className="w-3 h-3 text-blue-400" />
-            <span>Filtro: <b className="text-blue-300 font-bold">{selectedSize}</b></span>
-            <X className="w-3 h-3 ml-0.5" />
-          </button>
-        )}
+        <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-blue-500/15 text-blue-400 border border-blue-500/30">
+          {totalShirts} {totalShirts === 1 ? 'camisa' : 'camisas'}
+        </span>
       </div>
 
       {/* Grid of Sizes */}
