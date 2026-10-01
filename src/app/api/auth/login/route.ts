@@ -52,7 +52,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Payload inválido.' }, { status: 400 });
   }
 
-  const configuredPin = process.env.ADMIN_PIN?.trim();
+  const configuredPin = (process.env.ADMIN_PIN || process.env.NEXT_PUBLIC_ADMIN_PIN)?.trim();
   const isProd = process.env.NODE_ENV === 'production';
 
   if (isProd && !configuredPin) {
