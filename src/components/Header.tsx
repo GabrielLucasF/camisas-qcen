@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Image from 'next/image';
-import { Plus, Share2, Settings, Shirt } from 'lucide-react';
+import { Plus, Share2, Settings, Shirt, Users } from 'lucide-react';
 
 interface HeaderProps {
   title: string;
@@ -49,14 +49,15 @@ export function Header({
               </span>
             </div>
 
-            <div className="flex items-center gap-1.5 text-[11px] sm:text-xs text-neutral-400 mt-0.5 truncate">
-              <span className="font-semibold text-blue-400 flex items-center gap-1">
+            <div className="flex items-center gap-2 text-[11px] sm:text-xs text-neutral-400 mt-0.5 truncate">
+              <span className="font-semibold text-blue-400 flex items-center gap-1" title={`${totalShirts} camisas`}>
                 <Shirt className="w-3 h-3 shrink-0" />
-                {totalShirts} {totalShirts === 1 ? 'peça' : 'peças'}
+                {totalShirts}
               </span>
               <span className="text-neutral-600">•</span>
-              <span className="text-neutral-300 truncate">
-                {totalPeople} {totalPeople === 1 ? 'pedido' : 'pedidos'}
+              <span className="text-neutral-300 flex items-center gap-1 font-medium" title={`${totalPeople} pessoas`}>
+                <Users className="w-3 h-3 shrink-0 text-neutral-400" />
+                {totalPeople}
               </span>
             </div>
           </div>

@@ -98,7 +98,7 @@ export function FinancialSummary({
             <span className="font-display text-2xl text-white tracking-wider block leading-none">
               {stats.paidCount}
             </span>
-            <span className="text-[10px] text-neutral-400 uppercase tracking-wider block mt-0.5">pedidos</span>
+            <span className="text-[10px] text-neutral-400 uppercase tracking-wider block mt-0.5">pessoas</span>
           </div>
         </button>
 
@@ -129,7 +129,7 @@ export function FinancialSummary({
             <span className="font-display text-2xl text-white tracking-wider block leading-none">
               {stats.halfCount}
             </span>
-            <span className="text-[10px] text-neutral-400 uppercase tracking-wider block mt-0.5">pedidos</span>
+            <span className="text-[10px] text-neutral-400 uppercase tracking-wider block mt-0.5">pessoas</span>
           </div>
         </button>
 
@@ -160,7 +160,7 @@ export function FinancialSummary({
             <span className="font-display text-2xl text-white tracking-wider block leading-none">
               {stats.pendingCount}
             </span>
-            <span className="text-[10px] text-neutral-400 uppercase tracking-wider block mt-0.5">pedidos</span>
+            <span className="text-[10px] text-neutral-400 uppercase tracking-wider block mt-0.5">pessoas</span>
           </div>
         </button>
       </div>
