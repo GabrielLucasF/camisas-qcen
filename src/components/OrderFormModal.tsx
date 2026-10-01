@@ -171,7 +171,7 @@ export function OrderFormModal({
                   setError('');
                 }
               }}
-              placeholder="Ex: Amanda Pardim, Luís..."
+              placeholder="Ex: Amanda, Gabriel..."
               className="w-full bg-[#15192c] border border-[#222846] rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
