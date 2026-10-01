@@ -1,39 +1,51 @@
+@import url('https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 @import "tailwindcss";
 
 :root {
-  --background: #09090b;
-  --foreground: #f4f4f5;
+  --background: #090a10;
+  --foreground: #f8fafc;
+  --card: #111320;
+  --card-border: #1e2238;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-display: 'Anton', sans-serif;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background-color: #090a10;
+  color: #f8fafc;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   -webkit-tap-highlight-color: transparent;
+  background-image: 
+    radial-gradient(at 15% 10%, rgba(37, 99, 235, 0.14) 0px, transparent 50%),
+    radial-gradient(at 85% 90%, rgba(249, 115, 22, 0.08) 0px, transparent 50%);
+  background-attachment: fixed;
 }
 
-/* Custom scrollbar for desktop */
+/* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #171717;
+  background: #0d0f18;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #333333;
+  background: #1f243b;
   border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #444444;
+  background: #2b3352;
+}
+
+.font-display {
+  font-family: 'Anton', sans-serif;
+  letter-spacing: 0.04em;
 }

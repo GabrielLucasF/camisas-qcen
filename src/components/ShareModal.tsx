@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { Order, SizeSummaryItem, AppSettings } from '../types/order';
-import { X, Copy, Check, ExternalLink, Share2 } from 'lucide-react';
+import { X, Copy, Check, ExternalLink, Share2, Flame } from 'lucide-react';
 
 interface ShareModalProps {
   isOpen: boolean;
@@ -30,7 +30,8 @@ export function ShareModal({
   const formattedText = useMemo(() => {
     const lines: string[] = [];
 
-    lines.push(`👕 *${settings.title.toUpperCase()}* 👕\n`);
+    lines.push(`🔥 *QCEN — QUE COMECE EM NÓS* 🔥`);
+    lines.push(`👕 *${settings.title.toUpperCase()}*\n`);
 
     lines.push(`📊 *RESUMO DE TAMANHOS:*`);
     sizeSummary
@@ -71,6 +72,7 @@ export function ShareModal({
       lines.push('');
     }
 
+    lines.push(`_Que Comece Em Nós • @comeceemnos_`);
     lines.push(`_Atualizado em: ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}_`);
 
     return lines.join('\n');
@@ -101,23 +103,23 @@ export function ShareModal({
   const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(formattedText)}`;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
       <div
-        className="w-full max-w-lg bg-neutral-900 border border-neutral-800 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
+        className="w-full max-w-lg bg-[#0e111e] border border-[#1e233d] rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-neutral-800">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-[#1e233d] bg-[#121524]">
           <div className="flex items-center gap-2">
             <Share2 className="w-5 h-5 text-emerald-400" />
-            <h2 className="text-base sm:text-lg font-bold text-white">
+            <h2 className="font-display text-lg tracking-wider text-white uppercase">
               Compartilhar no WhatsApp
             </h2>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 rounded-lg text-neutral-400 hover:text-white hover:bg-neutral-800 transition"
+            className="p-1.5 rounded-lg text-neutral-400 hover:text-white hover:bg-[#1a2038] transition"
           >
             <X className="w-5 h-5" />
           </button>
@@ -126,13 +128,13 @@ export function ShareModal({
         {/* Content */}
         <div className="p-5 overflow-y-auto space-y-4">
           {/* Options */}
-          <div className="flex flex-col sm:flex-row gap-2.5 sm:gap-4 p-3 rounded-xl bg-neutral-800/60 border border-neutral-700/80 text-xs text-neutral-300">
+          <div className="flex flex-col sm:flex-row gap-2.5 sm:gap-4 p-3 rounded-xl bg-[#15192c] border border-[#222846] text-xs text-neutral-300">
             <label className="flex items-center gap-2 cursor-pointer select-none">
               <input
                 type="checkbox"
                 checked={includePendingList}
                 onChange={(e) => setIncludePendingList(e.target.checked)}
-                className="w-4 h-4 rounded text-emerald-500 bg-neutral-800 border-neutral-600 focus:ring-emerald-500"
+                className="w-4 h-4 rounded text-blue-500 bg-[#0e111e] border-neutral-600 focus:ring-blue-500"
               />
               <span>Listar pendentes / metade</span>
             </label>
@@ -142,7 +144,7 @@ export function ShareModal({
                 type="checkbox"
                 checked={includePaidList}
                 onChange={(e) => setIncludePaidList(e.target.checked)}
-                className="w-4 h-4 rounded text-emerald-500 bg-neutral-800 border-neutral-600 focus:ring-emerald-500"
+                className="w-4 h-4 rounded text-blue-500 bg-[#0e111e] border-neutral-600 focus:ring-blue-500"
               />
               <span>Listar pagos completos</span>
             </label>
@@ -150,14 +152,14 @@ export function ShareModal({
 
           {/* Textarea Preview */}
           <div>
-            <label className="block text-xs font-semibold text-neutral-300 mb-1.5">
+            <label className="block text-xs font-bold uppercase tracking-wider text-neutral-300 mb-1.5">
               Pré-visualização do texto
             </label>
             <textarea
               readOnly
               rows={11}
               value={formattedText}
-              className="w-full bg-neutral-950 border border-neutral-800 rounded-xl p-3 text-xs font-mono text-neutral-200 select-all focus:outline-none"
+              className="w-full bg-[#090b14] border border-[#1e233d] rounded-xl p-3 text-xs font-mono text-neutral-200 select-all focus:outline-none"
             />
           </div>
 
@@ -166,16 +168,16 @@ export function ShareModal({
             <button
               type="button"
               onClick={handleCopy}
-              className={`flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-xs sm:text-sm font-semibold transition active:scale-95 ${
+              className={`flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold uppercase tracking-wider transition active:scale-95 ${
                 copied
-                  ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/30'
-                  : 'bg-neutral-800 hover:bg-neutral-700 text-neutral-200 border border-neutral-700'
+                  ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/30'
+                  : 'bg-[#15192c] hover:bg-[#1c223c] text-neutral-200 border border-[#222846]'
               }`}
             >
               {copied ? (
                 <>
                   <Check className="w-4 h-4 text-emerald-300" />
-                  <span>Copiado com sucesso!</span>
+                  <span>Copiado!</span>
                 </>
               ) : (
                 <>
@@ -189,7 +191,7 @@ export function ShareModal({
               href={whatsappUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-neutral-950 text-xs sm:text-sm font-bold transition shadow-md shadow-emerald-500/20 active:scale-95"
+              className="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-neutral-950 text-xs sm:text-sm font-bold uppercase tracking-wider transition shadow-lg shadow-emerald-500/20 active:scale-95"
             >
               <span>Abrir no WhatsApp</span>
               <ExternalLink className="w-4 h-4" />

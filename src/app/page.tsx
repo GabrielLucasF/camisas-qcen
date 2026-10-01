@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Image from 'next/image';
 import { useOrders } from '../hooks/useOrders';
 import { Header } from '../components/Header';
 import { SizeSummary } from '../components/SizeSummary';
@@ -10,7 +11,25 @@ import { OrderFormModal } from '../components/OrderFormModal';
 import { ShareModal } from '../components/ShareModal';
 import { SettingsModal } from '../components/SettingsModal';
 import { Order, PaymentStatus } from '../types/order';
-import { Plus } from 'lucide-react';
+import { Plus, Flame } from 'lucide-react';
+
+function InstagramIcon({ className = 'w-4 h-4' }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
+      <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+      <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
+    </svg>
+  );
+}
 
 export default function Home() {
   const {
@@ -81,17 +100,26 @@ export default function Home() {
 
   if (!isLoaded) {
     return (
-      <div className="min-h-screen bg-neutral-950 text-neutral-400 flex items-center justify-center">
+      <div className="min-h-screen bg-[#090a10] text-neutral-400 flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
-          <span className="text-sm font-medium">Carregando pedidos...</span>
+          <div className="w-12 h-12 rounded-xl bg-blue-600/20 p-2 border border-blue-500/30 flex items-center justify-center animate-pulse">
+            <Image
+              src="/qcen-logo.png"
+              alt="QCEN"
+              width={32}
+              height={32}
+            />
+          </div>
+          <span className="text-xs uppercase font-bold tracking-widest text-blue-400">
+            Carregando QCEN...
+          </span>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-neutral-950 text-neutral-100 flex flex-col pb-24 sm:pb-12">
+    <div className="min-h-screen bg-[#090a10] text-neutral-100 flex flex-col pb-24 sm:pb-12">
       {/* Top Bar */}
       <Header
         title={settings.title}
@@ -123,12 +151,23 @@ export default function Home() {
         {/* Orders List Section */}
         <section className="pt-2">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-base sm:text-lg font-bold text-white tracking-tight">
-              Lista de Pedidos
-            </h2>
-            <span className="text-xs text-neutral-400">
-              {orders.length} cadastrados
-            </span>
+            <div className="flex items-center gap-2">
+              <h2 className="font-display text-lg sm:text-xl tracking-wider text-white uppercase">
+                Lista de Pedidos
+              </h2>
+              <span className="text-xs font-bold font-mono px-2 py-0.5 rounded-full bg-[#181d33] text-blue-300 border border-[#273054]">
+                {orders.length}
+              </span>
+            </div>
+
+            <button
+              type="button"
+              onClick={handleOpenNewOrder}
+              className="text-xs text-blue-400 hover:text-blue-300 font-bold flex items-center gap-1 transition"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>Novo</span>
+            </button>
           </div>
 
           <OrderList
@@ -142,6 +181,28 @@ export default function Home() {
             onOpenNewOrder={handleOpenNewOrder}
           />
         </section>
+
+        {/* QCEN Footer Note */}
+        <footer className="pt-8 pb-4 text-center border-t border-[#1a1e34] space-y-2">
+          <div className="flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-widest text-neutral-400">
+            <Flame className="w-3.5 h-3.5 text-orange-400" />
+            <span>Que Comece Em Nós — Governador Valadares</span>
+          </div>
+          <p className="text-[11px] text-neutral-400 italic">
+            &quot;O avivamento não começa em um palco. Começa em nós.&quot;
+          </p>
+          <div className="pt-1 flex items-center justify-center gap-3">
+            <a
+              href="https://www.instagram.com/comeceemnos/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 text-xs text-neutral-400 hover:text-blue-400 transition"
+            >
+              <InstagramIcon className="w-3.5 h-3.5" />
+              <span>@comeceemnos</span>
+            </a>
+          </div>
+        </footer>
       </main>
 
       {/* Floating Action Button for Mobile */}
@@ -149,10 +210,10 @@ export default function Home() {
         <button
           type="button"
           onClick={handleOpenNewOrder}
-          className="w-14 h-14 rounded-full bg-emerald-500 hover:bg-emerald-400 text-neutral-950 shadow-xl shadow-emerald-500/30 flex items-center justify-center transition active:scale-90"
+          className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white shadow-xl shadow-blue-600/40 flex items-center justify-center transition active:scale-90 border border-blue-400/40"
           title="Adicionar Novo Pedido"
         >
-          <Plus className="w-7 h-7 stroke-[2.5]" />
+          <Plus className="w-7 h-7 stroke-[3]" />
         </button>
       </div>
 

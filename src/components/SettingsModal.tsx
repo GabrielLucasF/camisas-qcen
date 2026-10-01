@@ -114,20 +114,20 @@ export function SettingsModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
       <div
-        className="w-full max-w-lg bg-neutral-900 border border-neutral-800 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
+        className="w-full max-w-lg bg-[#0e111e] border border-[#1e233d] rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-neutral-800">
-          <h2 className="text-base sm:text-lg font-bold text-white">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-[#1e233d] bg-[#121524]">
+          <h2 className="font-display text-lg tracking-wider text-white uppercase">
             Configurações e Dados
           </h2>
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 rounded-lg text-neutral-400 hover:text-white hover:bg-neutral-800 transition"
+            className="p-1.5 rounded-lg text-neutral-400 hover:text-white hover:bg-[#1a2038] transition"
           >
             <X className="w-5 h-5" />
           </button>
@@ -138,7 +138,7 @@ export function SettingsModal({
           {/* General settings form */}
           <form onSubmit={handleSaveSettings} className="space-y-4">
             <div>
-              <label className="block text-xs font-semibold text-neutral-300 mb-1.5">
+              <label className="block text-xs font-bold uppercase tracking-wider text-neutral-300 mb-1.5">
                 Nome do Projeto / Título
               </label>
               <input
@@ -146,12 +146,12 @@ export function SettingsModal({
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="Ex: Camisas do QCEN"
-                className="w-full bg-neutral-800 border border-neutral-700 rounded-xl px-3.5 py-2 text-sm text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="w-full bg-[#15192c] border border-[#222846] rounded-xl px-3.5 py-2 text-sm text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-neutral-300 mb-1.5">
+              <label className="block text-xs font-bold uppercase tracking-wider text-neutral-300 mb-1.5">
                 Valor Unitário da Camisa (R$)
               </label>
               <div className="relative">
@@ -163,7 +163,7 @@ export function SettingsModal({
                   value={unitPrice}
                   onChange={(e) => setUnitPrice(e.target.value)}
                   placeholder="35,00"
-                  className="w-full bg-neutral-800 border border-neutral-700 rounded-xl pl-10 pr-3.5 py-2 text-sm text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 font-mono"
+                  className="w-full bg-[#15192c] border border-[#222846] rounded-xl pl-10 pr-3.5 py-2 text-sm text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono"
                 />
               </div>
               <p className="text-[11px] text-neutral-500 mt-1">
@@ -173,11 +173,11 @@ export function SettingsModal({
 
             <button
               type="submit"
-              className="w-full py-2 px-4 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-neutral-950 font-bold text-xs sm:text-sm transition flex items-center justify-center gap-1.5"
+              className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-xs sm:text-sm uppercase tracking-wider transition flex items-center justify-center gap-1.5 shadow-lg shadow-blue-600/30 border border-blue-400/30"
             >
               {savedSuccess ? (
                 <>
-                  <Check className="w-4 h-4" />
+                  <Check className="w-4 h-4 text-emerald-300" />
                   <span>Salvo com sucesso!</span>
                 </>
               ) : (
@@ -187,7 +187,7 @@ export function SettingsModal({
           </form>
 
           {/* Backup & Export */}
-          <div className="border-t border-neutral-800 pt-5 space-y-3">
+          <div className="border-t border-[#1e233d] pt-5 space-y-3">
             <h3 className="text-xs font-bold text-neutral-400 uppercase tracking-wider">
               Backup e Exportação
             </h3>
@@ -196,19 +196,19 @@ export function SettingsModal({
               <button
                 type="button"
                 onClick={handleExportJSON}
-                className="flex items-center justify-center gap-2 p-2.5 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-xs font-medium text-neutral-200 border border-neutral-700 transition"
+                className="flex items-center justify-center gap-2 p-2.5 rounded-xl bg-[#15192c] hover:bg-[#1d233e] text-xs font-bold text-neutral-200 border border-[#222846] transition"
               >
-                <Download className="w-4 h-4 text-emerald-400" />
-                <span>Exportar Backup (JSON)</span>
+                <Download className="w-4 h-4 text-blue-400" />
+                <span>Exportar JSON</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="flex items-center justify-center gap-2 p-2.5 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-xs font-medium text-neutral-200 border border-neutral-700 transition"
+                className="flex items-center justify-center gap-2 p-2.5 rounded-xl bg-[#15192c] hover:bg-[#1d233e] text-xs font-bold text-neutral-200 border border-[#222846] transition"
               >
-                <Upload className="w-4 h-4 text-emerald-400" />
-                <span>Restaurar Backup</span>
+                <Upload className="w-4 h-4 text-blue-400" />
+                <span>Restaurar JSON</span>
               </button>
               <input
                 ref={fileInputRef}
@@ -221,7 +221,7 @@ export function SettingsModal({
               <button
                 type="button"
                 onClick={handleExportCSV}
-                className="sm:col-span-2 flex items-center justify-center gap-2 p-2.5 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-xs font-medium text-neutral-200 border border-neutral-700 transition"
+                className="sm:col-span-2 flex items-center justify-center gap-2 p-2.5 rounded-xl bg-[#15192c] hover:bg-[#1d233e] text-xs font-bold text-neutral-200 border border-[#222846] transition"
               >
                 <FileSpreadsheet className="w-4 h-4 text-emerald-400" />
                 <span>Baixar Planilha (Excel / CSV)</span>
@@ -230,7 +230,7 @@ export function SettingsModal({
           </div>
 
           {/* Reset / Clear Data */}
-          <div className="border-t border-neutral-800 pt-5 space-y-2">
+          <div className="border-t border-[#1e233d] pt-5 space-y-2">
             <h3 className="text-xs font-bold text-neutral-400 uppercase tracking-wider">
               Zona de Redefinição
             </h3>
@@ -240,7 +240,7 @@ export function SettingsModal({
                 type="button"
                 onClick={() => {
                   const confirmed = window.confirm(
-                    'Deseja restaurar a lista inicial com as 19 anotações do bloco original?'
+                    'Deseja restaurar a lista inicial com as anotações do bloco original?'
                   );
                   if (!confirmed) {
                     return;
@@ -248,7 +248,7 @@ export function SettingsModal({
                   onResetToInitial();
                   onClose();
                 }}
-                className="flex-1 flex items-center justify-center gap-1.5 p-2 rounded-xl bg-neutral-800/80 hover:bg-neutral-700 text-xs text-neutral-300 transition border border-neutral-700"
+                className="flex-1 flex items-center justify-center gap-1.5 p-2.5 rounded-xl bg-[#15192c] hover:bg-[#1e243f] text-xs text-neutral-300 transition border border-[#222846]"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
                 <span>Restaurar Anotação Original</span>
@@ -266,7 +266,7 @@ export function SettingsModal({
                   onClearAll();
                   onClose();
                 }}
-                className="flex items-center justify-center gap-1.5 p-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-xs text-rose-300 transition border border-rose-500/20"
+                className="flex items-center justify-center gap-1.5 p-2.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-xs text-rose-300 transition border border-rose-500/20"
               >
                 <Trash2 className="w-3.5 h-3.5" />
                 <span>Limpar Tudo</span>

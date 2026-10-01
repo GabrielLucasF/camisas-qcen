@@ -1,29 +1,22 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
 export const metadata: Metadata = {
-  title: "Camisas do QCEN | Gerenciador",
-  description: "Gerenciamento rápido de camisas, tamanhos e controle de pagamentos.",
+  title: "QCEN | Camisas — Que Comece Em Nós",
+  description: "Gerenciador de pedidos de camisas, tamanhos e pagamentos do QCEN (Que Comece Em Nós).",
+  icons: {
+    icon: "/qcen-logo.png",
+    apple: "/qcen-logo.png",
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "Camisas QCEN",
+    title: "QCEN Camisas",
   },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0a0a0a",
+  themeColor: "#090a10",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
@@ -35,11 +28,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="pt-BR"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased dark`}
-    >
-      <body className="min-h-full flex flex-col bg-neutral-950 text-neutral-100 selection:bg-emerald-500 selection:text-neutral-950">
+    <html lang="pt-BR" className="h-full antialiased dark">
+      <body className="min-h-full flex flex-col selection:bg-blue-600 selection:text-white">
         {children}
       </body>
     </html>

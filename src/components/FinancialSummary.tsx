@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { CheckCircle2, Clock, AlertCircle, DollarSign } from 'lucide-react';
+import { CheckCircle2, Clock, AlertCircle, DollarSign, Wallet } from 'lucide-react';
 import { PaymentStatus } from '../types/order';
 
 interface FinancialSummaryProps {
@@ -35,27 +35,28 @@ export function FinancialSummary({
   };
 
   return (
-    <div className="bg-neutral-900/80 border border-neutral-800 rounded-2xl p-4 sm:p-5 shadow-lg">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3.5">
+    <div className="bg-[#101322]/90 border border-[#1e233d] rounded-2xl p-4 sm:p-5 shadow-xl backdrop-blur-md">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 mb-3.5">
         <div className="flex items-center gap-2">
-          <DollarSign className="w-4 h-4 text-emerald-400" />
-          <h2 className="text-sm sm:text-base font-semibold text-white tracking-wide">
-            Controle de Pagamentos
+          <div className="w-6 h-6 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
+            <Wallet className="w-3.5 h-3.5" />
+          </div>
+          <h2 className="font-display text-base sm:text-lg tracking-wider text-white uppercase">
+            Controle Financeiro
           </h2>
           <span className="text-xs text-neutral-400 font-mono">
-            ({formatCurrency(unitPrice)}/unid)
+            ({formatCurrency(unitPrice)}/peça)
           </span>
         </div>
 
         {/* Financial Highlights */}
-        <div className="flex items-center gap-3 text-xs">
-          <span className="text-neutral-400">
-            Arrecadado: <strong className="text-emerald-400">{formatCurrency(stats.totalCollected)}</strong>
-          </span>
-          <span className="text-neutral-600">•</span>
-          <span className="text-neutral-400">
-            Falta: <strong className="text-amber-400">{formatCurrency(stats.totalRemaining)}</strong>
-          </span>
+        <div className="flex items-center gap-2 sm:gap-3 text-xs flex-wrap">
+          <div className="px-2.5 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-neutral-300">
+            Arrecadado: <strong className="text-emerald-400 font-mono">{formatCurrency(stats.totalCollected)}</strong>
+          </div>
+          <div className="px-2.5 py-1 rounded-lg bg-amber-500/10 border border-amber-500/20 text-neutral-300">
+            Falta receber: <strong className="text-amber-400 font-mono">{formatCurrency(stats.totalRemaining)}</strong>
+          </div>
         </div>
       </div>
 
@@ -67,16 +68,16 @@ export function FinancialSummary({
           onClick={() => onSelectStatus(selectedStatus === 'paid' ? 'all' : 'paid')}
           className={`flex items-center justify-between p-3 rounded-xl border text-left transition select-none active:scale-[0.98] ${
             selectedStatus === 'paid'
-              ? 'bg-emerald-500/20 border-emerald-500 ring-1 ring-emerald-500'
-              : 'bg-neutral-800/60 hover:bg-neutral-800 border-neutral-700/60 text-neutral-300'
+              ? 'bg-emerald-500/20 border-emerald-500 ring-1 ring-emerald-500 shadow-md shadow-emerald-500/20'
+              : 'bg-[#15192c]/90 hover:bg-[#1a2038] border-[#222846] text-neutral-300'
           }`}
         >
           <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
+            <div className="w-9 h-9 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0 border border-emerald-500/30">
               <CheckCircle2 className="w-4 h-4" />
             </div>
             <div className="min-w-0">
-              <div className="text-xs font-semibold text-emerald-300 truncate">
+              <div className="text-xs font-bold text-emerald-300 truncate uppercase tracking-wider">
                 Pago Completo
               </div>
               <div className="text-[11px] text-neutral-400">
@@ -85,10 +86,10 @@ export function FinancialSummary({
             </div>
           </div>
           <div className="text-right">
-            <span className="text-lg font-bold text-white">
+            <span className="font-display text-2xl text-white tracking-wider">
               {stats.paidCount}
             </span>
-            <div className="text-[10px] text-neutral-400">pedidos</div>
+            <div className="text-[10px] text-neutral-400 uppercase">pedidos</div>
           </div>
         </button>
 
@@ -98,16 +99,16 @@ export function FinancialSummary({
           onClick={() => onSelectStatus(selectedStatus === 'half' ? 'all' : 'half')}
           className={`flex items-center justify-between p-3 rounded-xl border text-left transition select-none active:scale-[0.98] ${
             selectedStatus === 'half'
-              ? 'bg-amber-500/20 border-amber-500 ring-1 ring-amber-500'
-              : 'bg-neutral-800/60 hover:bg-neutral-800 border-neutral-700/60 text-neutral-300'
+              ? 'bg-amber-500/20 border-amber-500 ring-1 ring-amber-500 shadow-md shadow-amber-500/20'
+              : 'bg-[#15192c]/90 hover:bg-[#1a2038] border-[#222846] text-neutral-300'
           }`}
         >
           <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0">
+            <div className="w-9 h-9 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0 border border-amber-500/30">
               <Clock className="w-4 h-4" />
             </div>
             <div className="min-w-0">
-              <div className="text-xs font-semibold text-amber-300 truncate">
+              <div className="text-xs font-bold text-amber-300 truncate uppercase tracking-wider">
                 Pago Metade (50%)
               </div>
               <div className="text-[11px] text-neutral-400">
@@ -116,10 +117,10 @@ export function FinancialSummary({
             </div>
           </div>
           <div className="text-right">
-            <span className="text-lg font-bold text-white">
+            <span className="font-display text-2xl text-white tracking-wider">
               {stats.halfCount}
             </span>
-            <div className="text-[10px] text-neutral-400">pedidos</div>
+            <div className="text-[10px] text-neutral-400 uppercase">pedidos</div>
           </div>
         </button>
 
@@ -129,16 +130,16 @@ export function FinancialSummary({
           onClick={() => onSelectStatus(selectedStatus === 'pending' ? 'all' : 'pending')}
           className={`flex items-center justify-between p-3 rounded-xl border text-left transition select-none active:scale-[0.98] ${
             selectedStatus === 'pending'
-              ? 'bg-rose-500/20 border-rose-500 ring-1 ring-rose-500'
-              : 'bg-neutral-800/60 hover:bg-neutral-800 border-neutral-700/60 text-neutral-300'
+              ? 'bg-rose-500/20 border-rose-500 ring-1 ring-rose-500 shadow-md shadow-rose-500/20'
+              : 'bg-[#15192c]/90 hover:bg-[#1a2038] border-[#222846] text-neutral-300'
           }`}
         >
           <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-8 h-8 rounded-lg bg-rose-500/20 text-rose-400 flex items-center justify-center shrink-0">
+            <div className="w-9 h-9 rounded-xl bg-rose-500/20 text-rose-400 flex items-center justify-center shrink-0 border border-rose-500/30">
               <AlertCircle className="w-4 h-4" />
             </div>
             <div className="min-w-0">
-              <div className="text-xs font-semibold text-rose-300 truncate">
+              <div className="text-xs font-bold text-rose-300 truncate uppercase tracking-wider">
                 Pendente
               </div>
               <div className="text-[11px] text-neutral-400">
@@ -147,10 +148,10 @@ export function FinancialSummary({
             </div>
           </div>
           <div className="text-right">
-            <span className="text-lg font-bold text-white">
+            <span className="font-display text-2xl text-white tracking-wider">
               {stats.pendingCount}
             </span>
-            <div className="text-[10px] text-neutral-400">pedidos</div>
+            <div className="text-[10px] text-neutral-400 uppercase">pedidos</div>
           </div>
         </button>
       </div>

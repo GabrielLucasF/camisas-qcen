@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { SizeSummaryItem } from '../types/order';
-import { Shirt, Filter, X } from 'lucide-react';
+import { Shirt, Filter, X, Flame } from 'lucide-react';
 
 interface SizeSummaryProps {
   summary: SizeSummaryItem[];
@@ -18,15 +18,21 @@ export function SizeSummary({
   onSelectSize,
 }: SizeSummaryProps) {
   return (
-    <div className="bg-neutral-900/80 border border-neutral-800 rounded-2xl p-4 sm:p-5 shadow-lg">
-      <div className="flex items-center justify-between mb-3.5">
+    <div className="bg-[#101322]/90 border border-[#1e233d] rounded-2xl p-4 sm:p-5 shadow-xl relative overflow-hidden backdrop-blur-md">
+      {/* Subtle background glow */}
+      <div className="absolute top-0 right-0 w-64 h-32 bg-blue-600/10 blur-3xl pointer-events-none -z-0" />
+      <div className="absolute bottom-0 left-0 w-48 h-24 bg-orange-500/5 blur-2xl pointer-events-none -z-0" />
+
+      <div className="relative z-10 flex items-center justify-between mb-3.5">
         <div className="flex items-center gap-2">
-          <Shirt className="w-4 h-4 text-emerald-400" />
-          <h2 className="text-sm sm:text-base font-semibold text-white tracking-wide">
-            Resumo por Tamanho
+          <div className="w-6 h-6 rounded-lg bg-blue-500/20 text-blue-400 flex items-center justify-center">
+            <Shirt className="w-3.5 h-3.5" />
+          </div>
+          <h2 className="font-display text-base sm:text-lg tracking-wider text-white uppercase">
+            Resumo de Tamanhos
           </h2>
-          <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-            {totalShirts} {totalShirts === 1 ? 'peça' : 'peças'}
+          <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-blue-500/15 text-blue-400 border border-blue-500/30">
+            {totalShirts} {totalShirts === 1 ? 'camisa' : 'camisas'}
           </span>
         </div>
 
@@ -34,17 +40,17 @@ export function SizeSummary({
           <button
             type="button"
             onClick={() => onSelectSize(null)}
-            className="flex items-center gap-1 text-xs text-neutral-400 hover:text-white transition px-2 py-1 rounded-md bg-neutral-800"
+            className="flex items-center gap-1.5 text-xs text-neutral-300 hover:text-white transition px-2.5 py-1 rounded-lg bg-[#1a2038] border border-blue-500/40"
           >
-            <Filter className="w-3 h-3 text-emerald-400" />
-            <span>Filtrado: <b className="text-emerald-400">{selectedSize}</b></span>
+            <Filter className="w-3 h-3 text-blue-400" />
+            <span>Filtro: <b className="text-blue-300 font-bold">{selectedSize}</b></span>
             <X className="w-3 h-3 ml-0.5" />
           </button>
         )}
       </div>
 
       {/* Grid of Sizes */}
-      <div className="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-6 gap-2 sm:gap-2.5">
+      <div className="relative z-10 grid grid-cols-3 sm:grid-cols-5 md:grid-cols-6 gap-2 sm:gap-2.5">
         {summary.map((item) => {
           const isSelected = selectedSize === item.size;
           const hasCount = item.count > 0;
@@ -54,24 +60,24 @@ export function SizeSummary({
               key={item.size}
               type="button"
               onClick={() => onSelectSize(isSelected ? null : item.size)}
-              className={`relative flex flex-col items-center justify-center p-2.5 sm:p-3 rounded-xl border transition text-center select-none active:scale-95 ${
+              className={`relative flex flex-col items-center justify-center p-2.5 sm:p-3 rounded-xl border transition text-center select-none active:scale-95 group ${
                 isSelected
-                  ? 'bg-emerald-500/20 border-emerald-500 text-white shadow-md shadow-emerald-500/20 ring-1 ring-emerald-500'
+                  ? 'bg-gradient-to-b from-blue-600/30 to-indigo-700/30 border-blue-400 text-white shadow-lg shadow-blue-500/20 ring-1 ring-blue-400'
                   : hasCount
-                  ? 'bg-neutral-800/80 hover:bg-neutral-800 border-neutral-700/80 text-neutral-200 hover:border-neutral-600'
-                  : 'bg-neutral-900/40 border-neutral-800/60 text-neutral-500 opacity-60 hover:opacity-90'
+                  ? 'bg-[#15192c]/90 hover:bg-[#1a2038] border-[#222846] text-neutral-200 hover:border-blue-500/40 shadow-sm'
+                  : 'bg-[#0e111e]/60 border-[#1a1e32] text-neutral-600 opacity-60 hover:opacity-80'
               }`}
             >
-              <span className="text-xs font-medium uppercase tracking-wider text-neutral-400">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-neutral-400">
                 Tam {item.size}
               </span>
               <span
-                className={`text-xl sm:text-2xl font-bold my-0.5 ${
+                className={`font-display text-2xl sm:text-3xl my-0.5 tracking-wider ${
                   isSelected
-                    ? 'text-emerald-300'
+                    ? 'text-blue-300'
                     : hasCount
                     ? 'text-white'
-                    : 'text-neutral-500'
+                    : 'text-neutral-600'
                 }`}
               >
                 {item.count}
@@ -81,10 +87,12 @@ export function SizeSummary({
               </span>
 
               {/* Mini progress indicator */}
-              <div className="w-full bg-neutral-700/40 rounded-full h-1 mt-1.5 overflow-hidden">
+              <div className="w-full bg-[#0d0f1b] rounded-full h-1.5 mt-2 overflow-hidden border border-white/5">
                 <div
                   className={`h-full rounded-full transition-all duration-300 ${
-                    isSelected ? 'bg-emerald-400' : 'bg-emerald-500/70'
+                    isSelected
+                      ? 'bg-gradient-to-r from-blue-400 to-indigo-400'
+                      : 'bg-gradient-to-r from-blue-500 to-indigo-600'
                   }`}
                   style={{ width: `${Math.min(100, item.percentage)}%` }}
                 />
@@ -94,9 +102,13 @@ export function SizeSummary({
         })}
       </div>
 
-      <p className="text-[11px] text-neutral-400 mt-2.5 text-center sm:text-left">
-        💡 Toque em um tamanho para filtrar os pedidos na lista abaixo.
-      </p>
+      <div className="relative z-10 flex items-center justify-between mt-3 text-[11px] text-neutral-400">
+        <p>💡 Toque em um tamanho para filtrar quem pediu.</p>
+        <div className="flex items-center gap-1 text-orange-400/80 font-medium">
+          <Flame className="w-3 h-3 text-orange-400" />
+          <span>QCEN Streetwear</span>
+        </div>
+      </div>
     </div>
   );
 }
