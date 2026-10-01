@@ -1,10 +1,16 @@
 -- =======================================================================
--- QCEN: SCHEMA DO BANCO DE DADOS SUPABASE (TABELA DE PEDIDOS)
+-- QCEN: SCHEMA SEGURO DO BANCO DE DADOS SUPABASE (TABELA DE PEDIDOS)
 -- =======================================================================
--- Como usar:
--- 1. Acesse seu painel no Supabase (https://supabase.com/dashboard)
--- 2. No menu lateral, clique em "SQL Editor"
--- 3. Cole este script e clique em "Run" (Executar)
+-- POLÍTICA DE SEGURANÇA MÁXIMA (ZERO TRUST / LGPD / DEFESA CONTRA SPAM):
+-- 1. Todas as requisições públicas (novos pedidos) e administrativas (painel)
+--    são mediadas exclusivamente pelas rotas /api do servidor Next.js.
+-- 2. O acesso direto da chave pública (anon) ao Supabase REST API é 100% BLOQUEADO.
+--    Isso impede que atacantes utilizem a anon_key para:
+--    - Raspar nomes e números de WhatsApp (violação da LGPD).
+--    - Contornar o rate limiting e o honeypot do Next.js via scripts cURL.
+--    - Inundar a tabela com milhões de pedidos falsos (DoS de armazenamento).
+-- 3. Apenas o backend Next.js autenticado com SUPABASE_SERVICE_ROLE_KEY tem
+--    permissão de leitura e escrita.
 -- =======================================================================
 
 create table if not exists public.orders (
@@ -19,32 +25,30 @@ create table if not exists public.orders (
   updated_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 
--- Habilitar Row Level Security (RLS)
+-- Habilitar Row Level Security (RLS) obrigatório
 alter table public.orders enable row level security;
 
--- Política de Leitura Pública
+-- 1. REMOVER POLÍTICAS ANTIGAS OU INSEGURAS
 drop policy if exists "Permitir leitura de pedidos" on public.orders;
-create policy "Permitir leitura de pedidos"
-on public.orders for select
-using (true);
-
--- Política de Inserção Pública (qualquer jovem pode enviar seu pedido)
+drop policy if exists "Permitir atualizacao de pedidos" on public.orders;
+drop policy if exists "Permitir exclusao de pedidos" on public.orders;
 drop policy if exists "Permitir insercao de pedidos" on public.orders;
-create policy "Permitir insercao de pedidos"
-on public.orders for insert
+drop policy if exists "Permitir insercao segura de pedidos" on public.orders;
+drop policy if exists "Acesso completo exclusivo para service_role" on public.orders;
+drop policy if exists "Acesso exclusivo service_role via backend Next.js" on public.orders;
+
+-- 2. REVOGAR TODOS OS PRIVILÉGIOS DIRETOS DE USUÁRIOS ANÔNIMOS E NÃO-ADMINISTRATIVOS
+revoke all on public.orders from anon;
+revoke all on public.orders from authenticated;
+
+-- 3. POLÍTICA DE ACESSO EXCLUSIVO PARA O BACKEND (service_role)
+-- O backend Next.js possui rate limiting, honeypot, sanitização e validação de tamanho de itens.
+create policy "Acesso exclusivo service_role via backend Next.js"
+on public.orders
+to service_role
+using (true)
 with check (true);
 
--- Política de Atualização (Líder pode atualizar status e dados)
-drop policy if exists "Permitir atualizacao de pedidos" on public.orders;
-create policy "Permitir atualizacao de pedidos"
-on public.orders for update
-using (true);
-
--- Política de Exclusão (Líder pode apagar pedidos)
-drop policy if exists "Permitir exclusao de pedidos" on public.orders;
-create policy "Permitir exclusao de pedidos"
-on public.orders for delete
-using (true);
-
--- Habilitar Realtime para a tabela orders
-alter publication supabase_realtime add table public.orders;
+-- 4. Garantir índices de performance para consultas por data e status
+create index if not exists idx_orders_created_at on public.orders (created_at desc);
+create index if not exists idx_orders_status on public.orders (status);

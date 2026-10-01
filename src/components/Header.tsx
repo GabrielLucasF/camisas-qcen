@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Image from 'next/image';
-import { Plus, Share2, Settings, Shirt, Users } from 'lucide-react';
+import { Plus, Share2, Settings, Shirt, Users, LogOut } from 'lucide-react';
 
 interface HeaderProps {
   title: string;
@@ -11,15 +11,16 @@ interface HeaderProps {
   onOpenNewOrder: () => void;
   onOpenShare: () => void;
   onOpenSettings: () => void;
+  onLogout?: () => void;
 }
 
 export function Header({
-  title,
   totalShirts,
   totalPeople,
   onOpenNewOrder,
   onOpenShare,
   onOpenSettings,
+  onLogout,
 }: HeaderProps) {
   return (
     <header className="sticky top-0 z-40 backdrop-blur-xl bg-[#07080d]/85 border-b border-white/10 px-3.5 py-2.5 sm:px-6 sm:py-3">
@@ -39,7 +40,7 @@ export function Header({
 
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-1.5">
-              <span className="font-display text-xl sm:text-2xl text-white tracking-wider uppercase leading-none">
+              <span className="font-display text-xl sm:text-2xl text-white tracking-wider uppercase leading-none truncate">
                 QCEN
               </span>
             </div>
@@ -78,6 +79,17 @@ export function Header({
           >
             <Settings className="w-4 h-4" />
           </button>
+
+          {onLogout && (
+            <button
+              type="button"
+              onClick={onLogout}
+              className="p-2 sm:p-2.5 rounded-full bg-[#131625] hover:bg-rose-500/20 text-neutral-400 hover:text-rose-300 transition border border-white/10 active:scale-95 cursor-pointer"
+              title="Encerrar Sessão Segura"
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
+          )}
 
           <button
             type="button"

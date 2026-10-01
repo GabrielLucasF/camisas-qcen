@@ -22,6 +22,7 @@ export default function PublicOrderPage() {
   const [quantidade, setQuantidade] = useState('1');
   const [multiplosTamanhos, setMultiplosTamanhos] = useState('');
   const [observacoes, setObservacoes] = useState('');
+  const [honeypot, setHoneypot] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -30,31 +31,46 @@ export default function PublicOrderPage() {
     e.preventDefault();
     setErrorMessage('');
 
-    if (!nome.trim()) {
-      setErrorMessage('Por favor, informe seu nome completo.');
+    if (honeypot.trim().length > 0) {
+      // Fake submission for bots
+      setIsSubmitted(true);
       return;
     }
 
-    if (!whatsapp.trim()) {
-      setErrorMessage('Por favor, informe seu número de WhatsApp com DDD.');
+    const trimmedNome = nome.trim();
+    if (trimmedNome.length < 2) {
+      setErrorMessage('Por favor, informe seu nome completo (mínimo 2 letras).');
+      return;
+    }
+
+    if (trimmedNome.length > 100) {
+      setErrorMessage('Nome muito extenso. Máximo de 100 caracteres.');
+      return;
+    }
+
+    const cleanedPhone = whatsapp.replace(/\D/g, '');
+    if (cleanedPhone.length < 8) {
+      setErrorMessage('Por favor, informe um número de WhatsApp válido com DDD.');
       return;
     }
 
     setIsSubmitting(true);
 
-    const qty = parseInt(quantidade, 10) || 1;
+    const qty = Math.min(20, Math.max(1, parseInt(quantidade, 10) || 1));
     const finalNotes = [
       multiplosTamanhos.trim() ? `Tamanhos múltiplos: ${multiplosTamanhos.trim()}` : '',
       observacoes.trim() ? `Obs: ${observacoes.trim()}` : '',
     ]
       .filter(Boolean)
-      .join(' | ');
+      .join(' | ')
+      .slice(0, 500);
 
     const result = await submitPublicOrder({
-      personName: nome.trim(),
+      personName: trimmedNome,
       whatsapp: whatsapp.trim(),
       items: [{ size: selectedSize, quantity: qty }],
       notes: finalNotes || undefined,
+      honeypot: honeypot || undefined,
     });
 
     setIsSubmitting(false);
@@ -309,6 +325,20 @@ export default function PublicOrderPage() {
         {/* FORMULÁRIO DE PEDIDO */}
         {!isSubmitted && (
           <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Anti-bot honeypot field */}
+            <div className="hidden" aria-hidden="true" style={{ display: 'none' }}>
+              <label htmlFor="website_confirm">Website</label>
+              <input
+                id="website_confirm"
+                type="text"
+                name="website_confirm"
+                tabIndex={-1}
+                autoComplete="off"
+                value={honeypot}
+                onChange={(e) => setHoneypot(e.target.value)}
+              />
+            </div>
+
             {errorMessage && (
               <div className="p-4 rounded-2xl bg-rose-500/15 border border-rose-500/40 text-xs text-rose-300 font-semibold flex items-center gap-2">
                 <AlertCircle className="w-4 h-4 shrink-0" />

@@ -10,17 +10,15 @@ import { OrderList } from '../../components/OrderList';
 import { OrderFormModal } from '../../components/OrderFormModal';
 import { ShareModal } from '../../components/ShareModal';
 import { SettingsModal } from '../../components/SettingsModal';
-import { Order, PaymentStatus } from '../../types/order';
-import { Plus, Flame, Lock, KeyRound } from 'lucide-react';
-
-const ADMIN_PIN = process.env.NEXT_PUBLIC_ADMIN_PIN || '1827';
-const AUTH_STORAGE_KEY = 'qcen_leader_auth_ts_v1';
-const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+import { Order, PaymentStatus, ShirtSize } from '../../types/order';
+import { Plus, Flame, Lock, KeyRound, LogOut, Loader2 } from 'lucide-react';
 
 export default function LeaderPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [pinInput, setPinInput] = useState('');
   const [pinError, setPinError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [isSubmittingPin, setIsSubmittingPin] = useState(false);
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
   const {
@@ -39,39 +37,85 @@ export default function LeaderPage() {
     totalShirts,
     sizeSummary,
     paymentStats,
-  } = useOrders();
+  } = useOrders({ enabled: isAuthenticated });
 
-  // Check saved session on mount (valid for 1 day)
+  // Check saved session on mount via secure server session check
   useEffect(() => {
-    try {
-      const savedAuthTs = localStorage.getItem(AUTH_STORAGE_KEY);
-      if (savedAuthTs) {
-        const authTime = parseInt(savedAuthTs, 10);
-        const isValid = !Number.isNaN(authTime) && Date.now() - authTime < ONE_DAY_MS;
-        if (isValid) {
-          setIsAuthenticated(true);
+    let isMounted = true;
+
+    async function checkServerSession() {
+      try {
+        const res = await fetch('/api/auth/check');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.authenticated && isMounted) {
+            setIsAuthenticated(true);
+            setIsCheckingAuth(false);
+            return;
+          }
         }
+      } catch {
+        // Network error handled gracefully
       }
-    } catch {
-      // storage error ignored
+
+      if (isMounted) {
+        setIsCheckingAuth(false);
+      }
     }
-    setIsCheckingAuth(false);
+
+    checkServerSession();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
-  const handlePinSubmit = (e: React.FormEvent) => {
+  const handlePinSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (pinInput.trim() === ADMIN_PIN) {
-      setIsAuthenticated(true);
-      setPinError(false);
-      try {
-        localStorage.setItem(AUTH_STORAGE_KEY, Date.now().toString());
-      } catch {
-        // storage error ignored
-      }
-      return;
-    }
+    setErrorMessage('');
+    setIsSubmittingPin(true);
 
-    setPinError(true);
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pin: pinInput.trim() }),
+      });
+
+      const data = await res.json().catch(() => ({}));
+      setIsSubmittingPin(false);
+
+      if (res.ok && data.success) {
+        setIsAuthenticated(true);
+        setPinError(false);
+        setPinInput('');
+        return;
+      }
+
+      setPinError(true);
+      setErrorMessage(data.error || 'PIN incorreto. Tente novamente.');
+      setPinInput('');
+    } catch {
+      setIsSubmittingPin(false);
+      setPinError(true);
+      setErrorMessage('Falha de conexão com o servidor.');
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' });
+    } catch {
+      // Ignored
+    }
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.removeItem('camisas_qcen_orders_v1');
+      } catch {
+        // Ignored
+      }
+    }
+    setIsAuthenticated(false);
     setPinInput('');
   };
 
@@ -97,7 +141,7 @@ export default function LeaderPage() {
 
   const handleSaveOrder = (data: {
     personName: string;
-    items: Array<{ size: any; quantity: number }>;
+    items: Array<{ size: ShirtSize; quantity: number }>;
     status: PaymentStatus;
     notes?: string;
   }) => {
@@ -133,7 +177,7 @@ export default function LeaderPage() {
     );
   }
 
-  // TELA DE BLOQUEIO POR PIN DO LÍDER
+  // TELA DE BLOQUEIO POR PIN DO LÍDER (Autenticação Segura via Servidor)
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-[#07080d] text-neutral-100 flex flex-col items-center justify-center p-4">
@@ -150,7 +194,7 @@ export default function LeaderPage() {
                 Painel da Liderança
               </h1>
               <p className="text-xs text-neutral-400 mt-1">
-                Digite o PIN para desbloquear o gerenciamento de pedidos
+                Digite o PIN de segurança para desbloquear o gerenciamento
               </p>
             </div>
           </div>
@@ -161,13 +205,15 @@ export default function LeaderPage() {
                 <input
                   type="password"
                   inputMode="numeric"
-                  maxLength={8}
+                  maxLength={12}
                   autoFocus
+                  disabled={isSubmittingPin}
                   value={pinInput}
                   onChange={(e) => {
                     setPinInput(e.target.value);
                     if (pinError) {
                       setPinError(false);
+                      setErrorMessage('');
                     }
                   }}
                   placeholder="••••"
@@ -182,17 +228,27 @@ export default function LeaderPage() {
 
               {pinError && (
                 <p className="text-xs text-rose-400 font-semibold animate-shake">
-                  PIN incorreto. Tente novamente.
+                  {errorMessage || 'PIN incorreto. Tente novamente.'}
                 </p>
               )}
             </div>
 
             <button
               type="submit"
-              className="w-full py-3.5 rounded-full bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm uppercase tracking-wider glow-electric hover:brightness-110 active:scale-[0.98] transition flex items-center justify-center gap-2 cursor-pointer"
+              disabled={isSubmittingPin}
+              className="w-full py-3.5 rounded-full bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white font-bold text-sm uppercase tracking-wider glow-electric hover:brightness-110 active:scale-[0.98] transition flex items-center justify-center gap-2 cursor-pointer"
             >
-              <Lock className="w-4 h-4" />
-              <span>Desbloquear Painel</span>
+              {isSubmittingPin ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span>Validando...</span>
+                </>
+              ) : (
+                <>
+                  <Lock className="w-4 h-4" />
+                  <span>Desbloquear Painel</span>
+                </>
+              )}
             </button>
           </form>
 
@@ -229,6 +285,7 @@ export default function LeaderPage() {
         onOpenNewOrder={handleOpenNewOrder}
         onOpenShare={() => setIsShareModalOpen(true)}
         onOpenSettings={() => setIsSettingsModalOpen(true)}
+        onLogout={handleLogout}
       />
 
       {/* Main Content Area */}
@@ -261,14 +318,26 @@ export default function LeaderPage() {
               </span>
             </div>
 
-            <button
-              type="button"
-              onClick={handleOpenNewOrder}
-              className="text-xs text-blue-400 hover:text-blue-300 font-bold flex items-center gap-1 transition"
-            >
-              <Plus className="w-3.5 h-3.5" />
-              <span>Novo</span>
-            </button>
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="text-xs text-neutral-400 hover:text-rose-300 flex items-center gap-1 transition"
+                title="Sair do painel da liderança"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Sair</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleOpenNewOrder}
+                className="text-xs text-blue-400 hover:text-blue-300 font-bold flex items-center gap-1 transition"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>Novo</span>
+              </button>
+            </div>
           </div>
 
           <OrderList

@@ -34,6 +34,8 @@ export function FinancialSummary({
     });
   };
 
+  const halfPrice = unitPrice / 2;
+
   return (
     <div className="bg-[#101322]/90 border border-[#1e233d] rounded-2xl p-4 sm:p-5 shadow-xl backdrop-blur-md">
       {/* Top Header & Highlights */}
@@ -48,7 +50,7 @@ export function FinancialSummary({
             </h2>
           </div>
           <span className="text-[11px] font-mono font-bold text-neutral-300 bg-[#161a2c] px-2 py-0.5 rounded-lg border border-[#232944] shrink-0">
-            R$ 70 / R$ 35
+            R$ {unitPrice.toFixed(0)} / R$ {halfPrice.toFixed(0)}
           </span>
         </div>
 

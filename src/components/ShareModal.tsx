@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { Order, SizeSummaryItem, AppSettings } from '../types/order';
-import { X, Copy, Check, ExternalLink, Share2, Flame } from 'lucide-react';
+import { X, Copy, Check, ExternalLink, Share2 } from 'lucide-react';
 
 interface ShareModalProps {
   isOpen: boolean;
@@ -85,6 +85,7 @@ export function ShareModal({
     return lines.join('\n');
   }, [
     settings.title,
+    settings.unitPrice,
     sizeSummary,
     totalShirts,
     totalPeople,

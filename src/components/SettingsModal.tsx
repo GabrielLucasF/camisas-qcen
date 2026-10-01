@@ -2,6 +2,7 @@
 
 import React, { useState, useRef } from 'react';
 import { AppSettings, Order } from '../types/order';
+import { sanitizeForCsv } from '../lib/security';
 import { X, Download, Upload, RotateCcw, Trash2, FileSpreadsheet, Check } from 'lucide-react';
 
 interface SettingsModalProps {
@@ -69,11 +70,11 @@ export function SettingsModal({
           : 'Pendente';
 
       return [
-        `"${order.personName.replace(/"/g, '""')}"`,
-        `"${sizes}"`,
+        sanitizeForCsv(order.personName),
+        sanitizeForCsv(sizes),
         totalQty,
-        `"${statusLabel}"`,
-        `"${(order.notes || '').replace(/"/g, '""')}"`,
+        sanitizeForCsv(statusLabel),
+        sanitizeForCsv(order.notes || ''),
       ].join(';');
     });
 
@@ -97,12 +98,36 @@ export function SettingsModal({
     reader.onload = (event) => {
       try {
         const parsed = JSON.parse(event.target?.result as string);
-        const importedOrders = Array.isArray(parsed) ? parsed : parsed.orders;
-        if (Array.isArray(importedOrders)) {
-          onImportOrders(importedOrders);
+        const candidateOrders = Array.isArray(parsed) ? parsed : parsed.orders;
+        if (Array.isArray(candidateOrders)) {
+          const validStatuses = ['pending', 'half', 'paid'];
+          const cleaned: Order[] = candidateOrders
+            .filter((o): o is Record<string, unknown> => typeof o === 'object' && o !== null)
+            .map((o, idx) => ({
+              id: typeof o.id === 'string' ? o.id : `imported-${Date.now()}-${idx}`,
+              personName: typeof o.personName === 'string' ? o.personName.trim().slice(0, 100) : 'Sem Nome',
+              whatsapp: typeof o.whatsapp === 'string' ? o.whatsapp.trim().slice(0, 25) : undefined,
+              paymentMethod: typeof o.paymentMethod === 'string' ? o.paymentMethod.trim().slice(0, 50) : undefined,
+              items: Array.isArray(o.items)
+                ? o.items.map((it, itIdx) => ({
+                    id: String(it?.id || `it-${itIdx}`),
+                    size: typeof it?.size === 'string' ? it.size : 'M',
+                    quantity: typeof it?.quantity === 'number' && it.quantity > 0 ? it.quantity : 1,
+                  }))
+                : [],
+              status: validStatuses.includes(String(o.status)) ? (o.status as Order['status']) : 'pending',
+              notes: typeof o.notes === 'string' ? o.notes.trim().slice(0, 500) : undefined,
+              createdAt: typeof o.createdAt === 'string' ? o.createdAt : new Date().toISOString(),
+              updatedAt: typeof o.updatedAt === 'string' ? o.updatedAt : new Date().toISOString(),
+            }));
+          onImportOrders(cleaned);
         }
-        if (parsed.settings) {
-          onUpdateSettings(parsed.settings);
+        if (parsed.settings && typeof parsed.settings === 'object') {
+          const s = parsed.settings as Record<string, unknown>;
+          onUpdateSettings({
+            title: typeof s.title === 'string' ? s.title.trim().slice(0, 80) : undefined,
+            unitPrice: typeof s.unitPrice === 'number' && s.unitPrice >= 0 ? s.unitPrice : undefined,
+          });
         }
         alert('Dados importados com sucesso!');
         onClose();

@@ -1,5 +1,19 @@
 import type { Metadata, Viewport } from "next";
+import { Anton, Inter } from "next/font/google";
 import "./globals.css";
+
+const anton = Anton({
+  weight: "400",
+  subsets: ["latin"],
+  variable: "--font-anton",
+  display: "swap",
+});
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "QCEN | Camisas — Que Comece Em Nós",
@@ -32,8 +46,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-BR" className="h-full antialiased dark">
-      <body className="min-h-full flex flex-col selection:bg-blue-600 selection:text-white">
+    <html lang="pt-BR" className={`h-full antialiased dark ${anton.variable} ${inter.variable}`}>
+      <body className="min-h-full flex flex-col selection:bg-blue-600 selection:text-white font-sans">
         {children}
       </body>
     </html>

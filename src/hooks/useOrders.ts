@@ -1,10 +1,8 @@
 'use client';
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { Order, AppSettings, SizeSummaryItem, PaymentStatus, OrderItem } from '../types/order';
+import { Order, AppSettings, SizeSummaryItem, PaymentStatus, OrderItem, ShirtSize } from '../types/order';
 import { INITIAL_ORDERS, DEFAULT_SETTINGS, AVAILABLE_SIZES } from '../data/initialData';
-import { getSupabaseClient, isSupabaseConfigured } from '../lib/supabase';
-import { mapRowToOrder, mapOrderToRow } from '../lib/ordersService';
 
 const STORAGE_KEY_ORDERS = 'camisas_qcen_orders_v1';
 const STORAGE_KEY_SETTINGS = 'camisas_qcen_settings_v1';
@@ -15,36 +13,40 @@ const NEXT_PAYMENT_STATUS: Record<PaymentStatus, PaymentStatus> = {
   paid: 'pending',
 };
 
-export function useOrders() {
+export function useOrders(options?: { enabled?: boolean }) {
+  const enabled = options?.enabled ?? true;
   const [orders, setOrders] = useState<Order[]>([]);
   const [settings, setSettings] = useState<AppSettings>(DEFAULT_SETTINGS);
   const [isLoaded, setIsLoaded] = useState(false);
 
-  // Load orders (Supabase if configured, otherwise localStorage)
+  // Load orders from secure API (fallback to localStorage if offline/unconfigured)
   useEffect(() => {
+    if (!enabled) {
+      return;
+    }
+
     let isMounted = true;
 
     async function loadData() {
-      const client = getSupabaseClient();
-      if (client) {
-        try {
-          const { data, error } = await client
-            .from('orders')
-            .select('*')
-            .order('created_at', { ascending: false });
-
-          if (!error && data && isMounted) {
-            const mappedOrders = data.map(mapRowToOrder);
-            setOrders(mappedOrders);
+      try {
+        const res = await fetch('/api/orders');
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data.orders) && data.configured && isMounted) {
+            setOrders(data.orders);
             setIsLoaded(true);
             return;
           }
-        } catch {
-          // fall through to local storage if network error
         }
+      } catch {
+        // Network error, fall back to localStorage
       }
 
-      // Local storage fallback
+      if (!isMounted) {
+        return;
+      }
+
+      // Local storage fallback only if enabled
       try {
         const storedOrders = localStorage.getItem(STORAGE_KEY_ORDERS);
         const storedSettings = localStorage.getItem(STORAGE_KEY_SETTINGS);
@@ -57,75 +59,39 @@ export function useOrders() {
           activeSettings = { ...parsedSettings, unitPrice: 70.0 };
         }
 
-        if (isMounted) {
-          setOrders(parsedOrders);
-          setSettings(activeSettings);
-        }
+        setOrders(parsedOrders);
+        setSettings(activeSettings);
       } catch {
-        if (isMounted) {
-          setOrders(INITIAL_ORDERS);
-          setSettings(DEFAULT_SETTINGS);
-        }
+        setOrders(INITIAL_ORDERS);
+        setSettings(DEFAULT_SETTINGS);
       }
 
-      if (isMounted) {
-        setIsLoaded(true);
-      }
+      setIsLoaded(true);
     }
 
     loadData();
 
-    // Supabase Realtime subscription
-    const client = getSupabaseClient();
-    if (!client) {
-      return () => {
-        isMounted = false;
-      };
-    }
-
-    const channel = client
-      .channel('realtime:orders')
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'orders' },
-        (payload) => {
-          if (payload.eventType === 'INSERT') {
-            const newOrder = mapRowToOrder(payload.new);
-            setOrders((prev) => {
-              const alreadyExists = prev.some((o) => o.id === newOrder.id);
-              if (alreadyExists) {
-                return prev;
-              }
-              return [newOrder, ...prev];
-            });
-            return;
+    // Poll server every 20 seconds to keep leader dashboard synchronized
+    const interval = setInterval(() => {
+      fetch('/api/orders')
+        .then((res) => (res.ok ? res.json() : null))
+        .then((data) => {
+          if (data?.configured && Array.isArray(data.orders) && isMounted) {
+            setOrders(data.orders);
           }
-
-          if (payload.eventType === 'UPDATE') {
-            const updated = mapRowToOrder(payload.new);
-            setOrders((prev) => prev.map((o) => (o.id === updated.id ? updated : o)));
-            return;
-          }
-
-          if (payload.eventType === 'DELETE') {
-            const deletedId = (payload.old as any)?.id;
-            if (deletedId) {
-              setOrders((prev) => prev.filter((o) => o.id !== deletedId));
-            }
-          }
-        }
-      )
-      .subscribe();
+        })
+        .catch(() => {});
+    }, 20000);
 
     return () => {
       isMounted = false;
-      client.removeChannel(channel);
+      clearInterval(interval);
     };
-  }, []);
+  }, [enabled]);
 
   // Sync to localStorage as backup/cache
   useEffect(() => {
-    if (!isLoaded) {
+    if (!enabled || !isLoaded) {
       return;
     }
     try {
@@ -133,7 +99,7 @@ export function useOrders() {
     } catch {
       // storage error handled silently
     }
-  }, [orders, isLoaded]);
+  }, [orders, isLoaded, enabled]);
 
   // Save settings to localStorage
   useEffect(() => {
@@ -173,9 +139,20 @@ export function useOrders() {
 
       setOrders((prev) => [newOrder, ...prev]);
 
-      const client = getSupabaseClient();
-      if (client) {
-        await client.from('orders').insert(mapOrderToRow(newOrder));
+      try {
+        await fetch('/api/orders', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            personName: newOrder.personName,
+            whatsapp: newOrder.whatsapp || '0000000000',
+            items: newOrder.items,
+            status: newOrder.status,
+            notes: newOrder.notes,
+          }),
+        });
+      } catch {
+        // Handled via local state and localStorage
       }
     },
     []
@@ -197,25 +174,14 @@ export function useOrders() {
         })
       );
 
-      const client = getSupabaseClient();
-      if (client) {
-        const patch: any = { updated_at: now };
-        if (updates.personName !== undefined) {
-          patch.person_name = updates.personName;
-        }
-        if (updates.whatsapp !== undefined) {
-          patch.whatsapp = updates.whatsapp;
-        }
-        if (updates.status !== undefined) {
-          patch.status = updates.status;
-        }
-        if (updates.items !== undefined) {
-          patch.items = updates.items;
-        }
-        if (updates.notes !== undefined) {
-          patch.notes = updates.notes;
-        }
-        await client.from('orders').update(patch).eq('id', id);
+      try {
+        await fetch('/api/orders', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id, updates }),
+        });
+      } catch {
+        // Handled via local state
       }
     },
     []
@@ -224,9 +190,12 @@ export function useOrders() {
   const deleteOrder = useCallback(async (id: string) => {
     setOrders((prev) => prev.filter((order) => order.id !== id));
 
-    const client = getSupabaseClient();
-    if (client) {
-      await client.from('orders').delete().eq('id', id);
+    try {
+      await fetch(`/api/orders?id=${encodeURIComponent(id)}`, {
+        method: 'DELETE',
+      });
+    } catch {
+      // Handled via local state
     }
   }, []);
 
@@ -239,10 +208,11 @@ export function useOrders() {
       const nextStatus = NEXT_PAYMENT_STATUS[target.status];
       const now = new Date().toISOString();
 
-      const client = getSupabaseClient();
-      if (client) {
-        client.from('orders').update({ status: nextStatus, updated_at: now }).eq('id', id);
-      }
+      fetch('/api/orders', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, updates: { status: nextStatus } }),
+      }).catch(() => {});
 
       return prev.map((order) => {
         if (order.id !== id) {
@@ -272,10 +242,11 @@ export function useOrders() {
       })
     );
 
-    const client = getSupabaseClient();
-    if (client) {
-      client.from('orders').update({ status, updated_at: now }).eq('id', id);
-    }
+    fetch('/api/orders', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, updates: { status } }),
+    }).catch(() => {});
   }, []);
 
   const updateSettings = useCallback((newSettings: Partial<AppSettings>) => {
@@ -292,9 +263,12 @@ export function useOrders() {
 
   const clearAll = useCallback(async () => {
     setOrders([]);
-    const client = getSupabaseClient();
-    if (client) {
-      await client.from('orders').delete().neq('id', '');
+    try {
+      await fetch('/api/orders?all=true', {
+        method: 'DELETE',
+      });
+    } catch {
+      // Handled via local state
     }
   }, []);
 
@@ -305,15 +279,18 @@ export function useOrders() {
     setOrders(newOrders);
   }, []);
 
+  const activeOrders = useMemo(() => (enabled ? orders : []), [enabled, orders]);
+  const activeLoaded = enabled ? isLoaded : false;
+
   // Summary calculations
-  const totalPeople = orders.length;
+  const totalPeople = activeOrders.length;
 
   const totalShirts = useMemo(() => {
-    return orders.reduce((sum, order) => {
+    return activeOrders.reduce((sum, order) => {
       const itemsCount = order.items.reduce((acc, it) => acc + (it.quantity || 1), 0);
       return sum + itemsCount;
     }, 0);
-  }, [orders]);
+  }, [activeOrders]);
 
   const sizeSummary = useMemo((): SizeSummaryItem[] => {
     const counts: Record<string, number> = {};
@@ -322,30 +299,31 @@ export function useOrders() {
       counts[s] = 0;
     });
 
-    orders.forEach((order) => {
+    activeOrders.forEach((order) => {
       order.items.forEach((item) => {
         const key = item.size;
         counts[key] = (counts[key] ?? 0) + (item.quantity || 1);
       });
     });
 
+    const defaultSizes: ShirtSize[] = ['P', 'M', 'G', 'GG', 'G1'];
     const list = Object.entries(counts)
       .map(([size, count]) => ({
         size,
         count,
         percentage: totalShirts > 0 ? Math.round((count / totalShirts) * 100) : 0,
       }))
-      .filter((item) => item.count > 0 || AVAILABLE_SIZES.slice(0, 5).includes(item.size as any));
+      .filter((item) => item.count > 0 || defaultSizes.includes(item.size as ShirtSize));
 
     return list;
-  }, [orders, totalShirts]);
+  }, [activeOrders, totalShirts]);
 
   const paymentStats = useMemo(() => {
     let paidShirts = 0;
     let halfShirts = 0;
     let pendingShirts = 0;
 
-    orders.forEach((order) => {
+    activeOrders.forEach((order) => {
       const shirtsCount = order.items.reduce((acc, it) => acc + (it.quantity || 1), 0);
       const isPaid = order.status === 'paid';
       const isHalf = order.status === 'half';
@@ -363,13 +341,13 @@ export function useOrders() {
 
     const price = settings.unitPrice || 0;
     const totalRevenueExpected = totalShirts * price;
-    const totalCollected = (paidShirts * price) + (halfShirts * (price / 2));
+    const totalCollected = paidShirts * price + halfShirts * (price / 2);
     const totalRemaining = totalRevenueExpected - totalCollected;
 
     return {
-      paidCount: orders.filter((o) => o.status === 'paid').length,
-      halfCount: orders.filter((o) => o.status === 'half').length,
-      pendingCount: orders.filter((o) => o.status === 'pending').length,
+      paidCount: activeOrders.filter((o) => o.status === 'paid').length,
+      halfCount: activeOrders.filter((o) => o.status === 'half').length,
+      pendingCount: activeOrders.filter((o) => o.status === 'pending').length,
       paidShirts,
       halfShirts,
       pendingShirts,
@@ -377,12 +355,12 @@ export function useOrders() {
       totalCollected,
       totalRemaining,
     };
-  }, [orders, totalShirts, settings.unitPrice]);
+  }, [activeOrders, totalShirts, settings.unitPrice]);
 
   return {
-    orders,
+    orders: activeOrders,
     settings,
-    isLoaded,
+    isLoaded: activeLoaded,
     addOrder,
     updateOrder,
     deleteOrder,
