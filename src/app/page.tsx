@@ -15,6 +15,28 @@ const SIZES: Array<{ label: string; value: ShirtSize; badge?: string }> = [
   { label: 'A definir (Vou pedir dica para a liderança)', value: 'A definir' },
 ];
 
+const formatWhatsApp = (value: string): string => {
+  let digits = value.replace(/\D/g, '');
+  if (digits.length > 11 && digits.startsWith('55')) {
+    digits = digits.slice(2);
+  }
+  digits = digits.slice(0, 11);
+
+  if (!digits) {
+    return '';
+  }
+  if (digits.length <= 2) {
+    return `(${digits}`;
+  }
+  if (digits.length <= 6) {
+    return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
+  }
+  if (digits.length <= 10) {
+    return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
+  }
+  return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7, 11)}`;
+};
+
 export default function PublicOrderPage() {
   const [nome, setNome] = useState('');
   const [whatsapp, setWhatsapp] = useState('');
@@ -84,8 +106,8 @@ export default function PublicOrderPage() {
     }
 
     const cleanedPhone = whatsapp.replace(/\D/g, '');
-    if (cleanedPhone.length < 8) {
-      setErrorMessage('Por favor, informe um número de WhatsApp válido com DDD.');
+    if (cleanedPhone.length < 10) {
+      setErrorMessage('Por favor, informe seu WhatsApp completo com DDD (Ex: (33) 99999-9999).');
       return;
     }
 
@@ -220,7 +242,7 @@ export default function PublicOrderPage() {
               <span>Chave PIX para Pagamento</span>
             </div>
             <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-              Celular
+              Chave Aleatória
             </span>
           </div>
 
@@ -228,37 +250,41 @@ export default function PublicOrderPage() {
             Faça o PIX do valor integral (R$ 70,00) ou do sinal mínimo (R$ 35,00). O comprovante você enviará diretamente pelo WhatsApp após enviar este formulário:
           </p>
 
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 bg-[#0a0d18] rounded-xl border border-emerald-500/20">
-            <div className="min-w-0">
-              <span className="text-xs text-neutral-400 block font-medium">Chave PIX (Amanda Pardim):</span>
-              <div className="flex items-baseline gap-2 mt-0.5">
-                <span className="font-mono font-bold text-white text-base sm:text-lg tracking-wide select-all">
+          <div className="p-3.5 bg-[#0a0d18] rounded-xl border border-emerald-500/20 space-y-2.5">
+            <div className="flex items-center justify-between text-xs text-neutral-400">
+              <span className="font-medium">Chave PIX (Amanda Pardim):</span>
+              <span className="text-[11px] text-emerald-400/80 font-mono">Copia e Cola</span>
+            </div>
+
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2.5">
+              <div className="flex-1 min-w-0 bg-[#131625] border border-white/10 rounded-xl px-3.5 py-2.5 flex items-center justify-between gap-2 overflow-hidden">
+                <span className="font-mono text-xs sm:text-sm text-white font-semibold tracking-tight select-all truncate">
                   bfbae6d9-acd4-4f55-a4eb-bc519cb67425
                 </span>
               </div>
-            </div>
 
-            <button
-              type="button"
-              onClick={handleCopyPix}
-              className={`inline-flex items-center justify-center gap-2 rounded-full font-bold text-xs px-5 py-2.5 shadow-lg transition shrink-0 cursor-pointer active:scale-95 ${
-                copiedPix
-                  ? 'bg-emerald-400 text-neutral-950 shadow-emerald-400/30'
-                  : 'bg-emerald-500 hover:bg-emerald-400 text-neutral-950 shadow-emerald-500/20'
-              }`}
-            >
-              {copiedPix ? (
-                <>
-                  <Check className="w-4 h-4 stroke-[3]" />
-                  <span>Chave Copiada!</span>
-                </>
-              ) : (
-                <>
-                  <Copy className="w-4 h-4" />
-                  <span>Copiar Chave PIX</span>
-                </>
-              )}
-            </button>
+              <button
+                type="button"
+                onClick={handleCopyPix}
+                className={`w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl sm:rounded-full font-bold text-xs px-5 py-2.5 shadow-lg transition shrink-0 cursor-pointer active:scale-95 ${
+                  copiedPix
+                    ? 'bg-emerald-400 text-neutral-950 shadow-emerald-400/30'
+                    : 'bg-emerald-500 hover:bg-emerald-400 text-neutral-950 shadow-emerald-500/20'
+                }`}
+              >
+                {copiedPix ? (
+                  <>
+                    <Check className="w-4 h-4 stroke-[3]" />
+                    <span>Chave Copiada!</span>
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-4 h-4" />
+                    <span>Copiar Chave PIX</span>
+                  </>
+                )}
+              </button>
+            </div>
           </div>
         </div>
 
@@ -428,10 +454,13 @@ export default function PublicOrderPage() {
               </p>
               <input
                 type="tel"
+                inputMode="numeric"
+                autoComplete="tel"
                 required
+                maxLength={15}
                 value={whatsapp}
-                onChange={(e) => setWhatsapp(e.target.value)}
-                placeholder="Ex: (33) 99999-9999"
+                onChange={(e) => setWhatsapp(formatWhatsApp(e.target.value))}
+                placeholder="(33) 99999-9999"
                 className="w-full bg-[#131625] border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 font-mono transition"
               />
             </div>
