@@ -253,7 +253,6 @@ export default function PublicOrderPage() {
           <div className="p-3.5 bg-[#0a0d18] rounded-xl border border-emerald-500/20 space-y-2.5">
             <div className="flex items-center justify-between text-xs text-neutral-400">
               <span className="font-medium">Chave PIX (Amanda Pardim):</span>
-              <span className="text-[11px] text-emerald-400/80 font-mono">Copia e Cola</span>
             </div>
 
             <div className="flex flex-col sm:flex-row sm:items-center gap-2.5">
