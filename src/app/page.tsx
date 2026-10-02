@@ -29,7 +29,7 @@ export default function PublicOrderPage() {
   const [errorMessage, setErrorMessage] = useState('');
 
   const handleCopyPix = () => {
-    const pixKey = '33998669831';
+    const pixKey = 'bfbae6d9-acd4-4f55-a4eb-bc519cb67425';
     try {
       if (navigator?.clipboard?.writeText) {
         navigator.clipboard.writeText(pixKey);
