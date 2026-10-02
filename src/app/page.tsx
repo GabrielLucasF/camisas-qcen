@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 import { submitPublicOrder } from '../lib/ordersService';
 import { ShirtSize } from '../types/order';
-import { CheckCircle2, MessageCircle, AlertCircle, Shirt, Loader2, Sparkles, CalendarClock, ArrowRight } from 'lucide-react';
+import { CheckCircle2, MessageCircle, AlertCircle, Shirt, Loader2, Sparkles, CalendarClock, ArrowRight, Copy, Check, QrCode } from 'lucide-react';
 
 const SIZES: Array<{ label: string; value: ShirtSize; badge?: string }> = [
   { label: 'P (52 cm larg x 71 cm comp)', value: 'P' },
@@ -23,9 +23,44 @@ export default function PublicOrderPage() {
   const [multiplosTamanhos, setMultiplosTamanhos] = useState('');
   const [observacoes, setObservacoes] = useState('');
   const [honeypot, setHoneypot] = useState('');
+  const [copiedPix, setCopiedPix] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+
+  const handleCopyPix = () => {
+    const pixKey = '33998669831';
+    try {
+      if (navigator?.clipboard?.writeText) {
+        navigator.clipboard.writeText(pixKey);
+        setCopiedPix(true);
+        setTimeout(() => {
+          setCopiedPix(false);
+        }, 2500);
+        return;
+      }
+    } catch {
+      // fallback
+    }
+
+    const textArea = document.createElement('textarea');
+    textArea.value = pixKey;
+    textArea.style.position = 'fixed';
+    textArea.style.left = '-9999px';
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    try {
+      document.execCommand('copy');
+      setCopiedPix(true);
+      setTimeout(() => {
+        setCopiedPix(false);
+      }, 2500);
+    } catch {
+      // ignore
+    }
+    document.body.removeChild(textArea);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -177,34 +212,53 @@ export default function PublicOrderPage() {
           </p>
         </div>
 
-        {/* Card Envio de Comprovante PIX */}
+        {/* Card Chave PIX e Pagamento */}
         <div className="p-5 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-xs space-y-3">
-          <div className="flex items-center gap-2 font-bold text-emerald-300 text-sm">
-            <AlertCircle className="w-4 h-4 text-emerald-400 shrink-0" />
-            <span>OBRIGATÓRIO: Envio do Comprovante PIX</span>
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 font-bold text-emerald-300 text-sm">
+              <QrCode className="w-4 h-4 text-emerald-400 shrink-0" />
+              <span>Chave PIX para Pagamento</span>
+            </div>
+            <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+              Celular
+            </span>
           </div>
 
           <p className="text-neutral-300 leading-relaxed text-xs">
-            Assim que fizer o pagamento (metade ou total), envie o comprovante diretamente no WhatsApp para confirmação do seu pedido:
+            Faça o PIX do valor integral (R$ 70,00) ou do sinal mínimo (R$ 35,00). O comprovante você enviará diretamente pelo WhatsApp após enviar este formulário:
           </p>
 
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 bg-[#0a0d18] rounded-xl border border-emerald-500/20">
-            <div>
-              <span className="text-xs text-neutral-400 block font-medium">Responsável financeira:</span>
-              <span className="font-bold text-white text-sm">
-                Amanda Pardim: <span className="text-emerald-400 font-mono">+55 33 99866-9831</span>
-              </span>
+            <div className="min-w-0">
+              <span className="text-xs text-neutral-400 block font-medium">Chave PIX (Amanda Pardim):</span>
+              <div className="flex items-baseline gap-2 mt-0.5">
+                <span className="font-mono font-bold text-white text-base sm:text-lg tracking-wide select-all">
+                  (33) 99866-9831
+                </span>
+              </div>
             </div>
 
-            <a
-              href="https://api.whatsapp.com/send?phone=5533998669831&text=Ol%C3%A1%20Amanda!%20Fiz%20meu%20pedido%20da%20camisa%20do%20QCEN%20e%20estou%20enviando%20o%20comprovante."
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-2 rounded-full bg-emerald-500 hover:bg-emerald-400 text-neutral-950 font-bold text-xs px-5 py-2.5 shadow-lg shadow-emerald-500/20 transition shrink-0"
+            <button
+              type="button"
+              onClick={handleCopyPix}
+              className={`inline-flex items-center justify-center gap-2 rounded-full font-bold text-xs px-5 py-2.5 shadow-lg transition shrink-0 cursor-pointer active:scale-95 ${
+                copiedPix
+                  ? 'bg-emerald-400 text-neutral-950 shadow-emerald-400/30'
+                  : 'bg-emerald-500 hover:bg-emerald-400 text-neutral-950 shadow-emerald-500/20'
+              }`}
             >
-              <MessageCircle className="w-4 h-4" />
-              <span>Chamar no WhatsApp</span>
-            </a>
+              {copiedPix ? (
+                <>
+                  <Check className="w-4 h-4 stroke-[3]" />
+                  <span>Chave Copiada!</span>
+                </>
+              ) : (
+                <>
+                  <Copy className="w-4 h-4" />
+                  <span>Copiar Chave PIX</span>
+                </>
+              )}
+            </button>
           </div>
         </div>
 
