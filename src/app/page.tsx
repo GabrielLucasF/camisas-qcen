@@ -233,7 +233,7 @@ export default function PublicOrderPage() {
               <span className="text-xs text-neutral-400 block font-medium">Chave PIX (Amanda Pardim):</span>
               <div className="flex items-baseline gap-2 mt-0.5">
                 <span className="font-mono font-bold text-white text-base sm:text-lg tracking-wide select-all">
-                  (33) 99866-9831
+                  bfbae6d9-acd4-4f55-a4eb-bc519cb67425
                 </span>
               </div>
             </div>
